@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 13:50:23
+ * @LastEditTime: 2023-08-22 17:35:49
  * @Description: 
  */
 
@@ -65,8 +65,6 @@ class CodeMain {
 
     // 打开第一个窗口
     openFirstWindow(instantiationService: InstantiationService) {
-
-        // 此时WindowApplicationService即是接口类型
         const desc = new SyncDescriptor(WindowApplicationService)
         const windowApplication = instantiationService.createInstance<IWindowApplicationService>(desc)
 
