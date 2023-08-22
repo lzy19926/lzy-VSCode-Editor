@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:42:37
+ * @LastEditTime: 2023-08-22 19:00:03
  * @Description: 顶部导航菜单栏
  */
 
@@ -24,21 +24,29 @@ export class TitleBarPart implements ITitleBarService, Part {
     create(container: HTMLElement): void {
 
         this._container = container
-
-        this.createButton()
+        
+        this.createOpenFileBtn()
+        this.saveFileBtn()
     }
 
 
 
-
-    createButton() {
+    // 保存文件按钮
+    saveFileBtn() {
+        const editor = this.editorService
+        const btn = document.createElement("button")
+        btn.innerText = "保存文件测试"
+        btn.onclick = this.readFileTest.bind(this)
+        this._container.appendChild(btn)
+    }
+    // 打开文件按钮
+    createOpenFileBtn() {
         const btn = document.createElement("input")
         btn.innerText = "打开文件测试"
         btn.type = "file"
         btn.onchange = this.readFileTest.bind(this)
         this._container.appendChild(btn)
     }
-
 
     // 加载文件测试
     readFileTest(event: Event) {

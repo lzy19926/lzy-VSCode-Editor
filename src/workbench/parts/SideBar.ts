@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:35:32
+ * @LastEditTime: 2023-08-22 18:59:27
  * @Description: 左侧文件资源管理器view模块
  */
 
@@ -16,7 +16,8 @@ export class SideBarPart implements ISideBarService, Part {
     private _container!: HTMLElement
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService
+        //TODO 两个part同时注入同一个Service会报错
+        //  @IEditorService private readonly editorService: IEditorService
     ) {
 
     }

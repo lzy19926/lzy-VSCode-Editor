@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:55:23
+ * @LastEditTime: 2023-08-22 18:59:48
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const EditorPart_1 = __webpack_require__(1);
@@ -36,7 +36,7 @@ var Parts;
 })(Parts || (exports.Parts = Parts = {}));
 let Workbench = exports.Workbench = class Workbench {
     parts = new Map();
-    constructor(titleBarService, editorService, sideBarService) {
+    constructor(editorService, titleBarService, sideBarService) {
         this.parts.set(Parts.EDITOR_PART, editorService);
         this.parts.set(Parts.SIDEBAR_PART, sideBarService);
         this.parts.set(Parts.TITLEBAR_PART, titleBarService);
@@ -64,8 +64,8 @@ let Workbench = exports.Workbench = class Workbench {
     }
 };
 exports.Workbench = Workbench = __decorate([
-    __param(0, TitleBar_1.ITitleBarService),
-    __param(1, EditorPart_1.IEditorService),
+    __param(0, EditorPart_1.IEditorService),
+    __param(1, TitleBar_1.ITitleBarService),
     __param(2, SideBar_1.ISideBarService)
 ], Workbench);
 // 创建运行workbench
@@ -249,6 +249,37 @@ exports.getGlobalCollection = getGlobalCollection;
 
 /***/ }),
 /* 4 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-22 11:36:46
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-22 18:59:27
+ * @Description: 左侧文件资源管理器view模块
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ISideBarService = exports.SideBarPart = void 0;
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+class SideBarPart {
+    _container;
+    constructor(
+    //  @IEditorService private readonly editorService: IEditorService
+    ) {
+    }
+    create(container) {
+        this._container = container;
+    }
+}
+exports.SideBarPart = SideBarPart;
+exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
+(0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
+
+
+/***/ }),
+/* 5 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -256,8 +287,8 @@ exports.getGlobalCollection = getGlobalCollection;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:35:32
- * @Description: 左侧文件资源管理器view模块
+ * @LastEditTime: 2023-08-22 19:00:03
+ * @Description: 顶部导航菜单栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -269,11 +300,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ISideBarService = exports.SideBarPart = void 0;
+exports.ITitleBarService = exports.TitleBarPart = void 0;
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const EditorPart_1 = __webpack_require__(1);
-let SideBarPart = exports.SideBarPart = class SideBarPart {
+let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     editorService;
     _container;
     constructor(editorService) {
@@ -281,9 +312,19 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
     }
     create(container) {
         this._container = container;
-        this.createButton();
+        this.createOpenFileBtn();
+        this.saveFileBtn();
     }
-    createButton() {
+    // 保存文件按钮
+    saveFileBtn() {
+        const editor = this.editorService;
+        const btn = document.createElement("button");
+        btn.innerText = "保存文件测试";
+        btn.onclick = this.readFileTest.bind(this);
+        this._container.appendChild(btn);
+    }
+    // 打开文件按钮
+    createOpenFileBtn() {
         const btn = document.createElement("input");
         btn.innerText = "打开文件测试";
         btn.type = "file";
@@ -307,34 +348,9 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         }
     }
 };
-exports.SideBarPart = SideBarPart = __decorate([
+exports.TitleBarPart = TitleBarPart = __decorate([
     __param(0, EditorPart_1.IEditorService)
-], SideBarPart);
-exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
-(0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
-
-
-/***/ }),
-/* 5 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-/*
- * @Author: Luzy
- * @Date: 2023-08-22 11:36:46
- * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 12:57:17
- * @Description:
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ITitleBarService = exports.TitleBarPart = void 0;
-const decorator_1 = __webpack_require__(2);
-const serviceCollection_1 = __webpack_require__(3);
-class TitleBarPart {
-    create(container) {
-    }
-}
-exports.TitleBarPart = TitleBarPart;
+], TitleBarPart);
 exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ITitleBarService, TitleBarPart);
 
@@ -348,7 +364,7 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:12:58
+ * @LastEditTime: 2023-08-22 18:53:16
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -370,7 +386,8 @@ class InstantiationService {
         const serviceDependencies = ctor["id$dependences"] || [];
         for (const dependency of serviceDependencies) {
             const service = this.getOrCreateServiceInstance(dependency);
-            serviceArgs.push(service);
+            // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
+            serviceArgs.unshift(service);
         }
         // 真实创建实例
         return new ctor(...[...staticArgs, ...serviceArgs]);

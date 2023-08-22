@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:12:58
+ * @LastEditTime: 2023-08-22 18:53:16
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 
@@ -32,14 +32,14 @@ export class InstantiationService {
 
         // 将装饰器注入的服务取出并进行实例化
         // 装饰器保存依赖描述符到数组中
+       
         const serviceDependencies = ctor["id$dependences"] || []
 
         for (const dependency of serviceDependencies) {
             const service = this.getOrCreateServiceInstance(dependency)
-
-            serviceArgs.push(service)
+             // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
+            serviceArgs.unshift(service)
         }
-
 
         // 真实创建实例
         return new ctor(...[...staticArgs, ...serviceArgs])
