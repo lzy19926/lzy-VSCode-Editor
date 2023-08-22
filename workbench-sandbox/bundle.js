@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:11:17
+ * @LastEditTime: 2023-08-22 17:55:23
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const EditorPart_1 = __webpack_require__(1);
@@ -46,18 +46,19 @@ let Workbench = exports.Workbench = class Workbench {
     }
     createParts() {
         const needParts = [
-            { id: Parts.EDITOR_PART },
-            { id: Parts.SIDEBAR_PART },
-            { id: Parts.TITLEBAR_PART },
+            { id: Parts.EDITOR_PART, classList: ["editor"] },
+            { id: Parts.SIDEBAR_PART, classList: ["sideBar"] },
+            { id: Parts.TITLEBAR_PART, classList: ["titleBar"] },
         ];
-        for (const { id } of needParts) {
-            const partContainer = this.createPartContainer(id);
+        for (const { id, classList } of needParts) {
+            const partContainer = this.createPartContainer(id, classList);
             this.parts.get(id).create(partContainer);
         }
     }
-    createPartContainer(id) {
+    createPartContainer(id, classList) {
         const container = document.createElement('div');
         container.id = id;
+        container.classList.add(...classList);
         document.body.appendChild(container);
         return container;
     }
@@ -89,7 +90,7 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:29:07
+ * @LastEditTime: 2023-08-22 18:35:44
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
@@ -99,16 +100,9 @@ class EditorPart {
     _editor;
     _container;
     constructor() { }
-    // 创建编辑器
-    create(container) {
-        this._container = container;
-        this.updateStyle();
-        this.loadMonacoStyle();
-        this.loadMonaco();
-    }
     // 更新容器样式
     updateStyle() {
-        this._container.style.height = "500px";
+        this._container.style.height = "95%";
     }
     // 加载monaco-editor
     //todo 这里需要解决路径问题
@@ -119,7 +113,7 @@ class EditorPart {
         require(['vs/editor/editor.main'], () => {
             var options = {
                 value: '// 在此处输入您的代码',
-                language: 'javascript',
+                language: 'typescript',
                 theme: "vs-dark"
             };
             /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上 
@@ -133,6 +127,17 @@ class EditorPart {
         link.type = 'text/css';
         link.href = "../node_modules/monaco-editor/min/vs/editor/editor.main.css";
         document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    // 创建编辑器
+    create(container) {
+        this._container = container;
+        this.updateStyle();
+        this.loadMonacoStyle();
+        this.loadMonaco();
+    }
+    // 编辑器加载文件
+    loadFileContent(text) {
+        this._editor.getModel().setValue(text);
     }
 }
 exports.EditorPart = EditorPart;
@@ -244,25 +249,67 @@ exports.getGlobalCollection = getGlobalCollection;
 
 /***/ }),
 /* 4 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 /*
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 12:57:01
- * @Description:
+ * @LastEditTime: 2023-08-22 18:35:32
+ * @Description: 左侧文件资源管理器view模块
  */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ISideBarService = exports.SideBarPart = void 0;
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
-class SideBarPart {
-    create(container) {
+const EditorPart_1 = __webpack_require__(1);
+let SideBarPart = exports.SideBarPart = class SideBarPart {
+    editorService;
+    _container;
+    constructor(editorService) {
+        this.editorService = editorService;
     }
-}
-exports.SideBarPart = SideBarPart;
+    create(container) {
+        this._container = container;
+        this.createButton();
+    }
+    createButton() {
+        const btn = document.createElement("input");
+        btn.innerText = "打开文件测试";
+        btn.type = "file";
+        btn.onchange = this.readFileTest.bind(this);
+        this._container.appendChild(btn);
+    }
+    // 加载文件测试
+    readFileTest(event) {
+        /**@ts-ignore*/
+        const file = event.target?.files?.[0];
+        const editor = this.editorService;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const text = reader.result;
+                if (typeof text == 'string') {
+                    editor.loadFileContent(text);
+                }
+            };
+            reader.readAsText(file);
+        }
+    }
+};
+exports.SideBarPart = SideBarPart = __decorate([
+    __param(0, EditorPart_1.IEditorService)
+], SideBarPart);
 exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
 

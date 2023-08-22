@@ -1,0 +1,30 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.editor {
+    height: 100%;
+    width: 85%;
+    position: fixed;
+    right: 0;
+    top: 5%;
+}
+
+.sideBar {
+    height: 100%;
+    width: 15%;
+    position: fixed;
+    left: 0;
+    top: 5%;
+    background-color:bisque;
+}
+
+.titleBar {
+    height: 5%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: brown;
+}

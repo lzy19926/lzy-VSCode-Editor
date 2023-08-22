@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:11:17
+ * @LastEditTime: 2023-08-22 17:55:23
  * @Description: 运行于浏览器端的编辑器主模块
  */
 import { IEditorService } from './parts/EditorPart'
@@ -39,21 +39,22 @@ export class Workbench {
 
     createParts() {
         const needParts = [
-            { id: Parts.EDITOR_PART },
-            { id: Parts.SIDEBAR_PART },
-            { id: Parts.TITLEBAR_PART },
+            { id: Parts.EDITOR_PART, classList: ["editor"] },
+            { id: Parts.SIDEBAR_PART, classList: ["sideBar"] },
+            { id: Parts.TITLEBAR_PART, classList: ["titleBar"] },
         ]
 
-        for (const { id } of needParts) {
-            const partContainer = this.createPartContainer(id);
+        for (const { id, classList } of needParts) {
+            const partContainer = this.createPartContainer(id, classList);
             this.parts.get(id).create(partContainer);
         }
     }
 
-    createPartContainer(id: string): HTMLElement {
+    createPartContainer(id: string, classList: string[]): HTMLElement {
         const container = document.createElement('div');
         container.id = id
-
+        
+        container.classList.add(...classList)
         document.body.appendChild(container)
         return container
     }
