@@ -4,12 +4,11 @@
   "version": "1.0.0",
   "description": "仿写的VSCode编辑器",
   "main": "./out/main/main.js",
-  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && electron-forge start",
-    "make": "electron-forge make",
-    "watch":"tsc --watch"
+    "make": "tsc && electron-forge make",
+    "watch": "tsc --watch"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +23,7 @@
     "@electron-forge/maker-squirrel": "^6.0.5",
     "@electron-forge/maker-zip": "^6.0.5",
     "electron": "^23.0.0",
+    "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   }
 }
