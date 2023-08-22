@@ -2,22 +2,20 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:56:04
+ * @LastEditTime: 2023-08-22 13:50:23
  * @Description: 
  */
 
 
-import { app, dialog } from 'electron';
-import { getGlobalCollection, SyncDescriptor } from '../IOC/serviceCollection'
-import { InstantiationService, IInstantiationService } from '../IOC/InstantiationService'
-import { WindowMainService, IWindowMainService } from './windowMainService';
-import type { ServiceCollection } from '../IOC/serviceCollection'
+import { app } from 'electron';
+import { getGlobalCollection, SyncDescriptor } from '../common/IOC/serviceCollection'
+import { InstantiationService, IInstantiationService } from '../common/IOC/InstantiationService'
+import { WindowApplicationService, IWindowApplicationService } from './WindowApplication';
+import type { ServiceCollection } from '../common/IOC/serviceCollection'
 import { INlsService } from '../common/NlsService';
 import { IFileService } from '../common/FileService';
 import { IPerformanceService } from '../common/PerformanceService';
 import { IWindowService } from '../common/WindowService';
-
-
 
 class CodeMain {
 
@@ -68,15 +66,12 @@ class CodeMain {
     // 打开第一个窗口
     openFirstWindow(instantiationService: InstantiationService) {
 
-        // 此时windowMainService即是接口类型
-        const desc = new SyncDescriptor(WindowMainService)
-        const windowMainService = instantiationService.createInstance<IWindowMainService>(desc)
+        // 此时WindowApplicationService即是接口类型
+        const desc = new SyncDescriptor(WindowApplicationService)
+        const windowApplication = instantiationService.createInstance<IWindowApplicationService>(desc)
 
-        windowMainService.open()
+        windowApplication.open()
     }
-
-
-
 }
 
 

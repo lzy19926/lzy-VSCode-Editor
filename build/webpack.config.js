@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 15:54:15
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 16:00:49
+ * @LastEditTime: 2023-08-22 17:15:37
  * @Description: webpack配置  用于单独构建workbench以运行在浏览器环境
  */
 
@@ -13,7 +13,7 @@ module.exports = {
     entry: './src/workbench/Workbench.ts',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, '../workbenchDist'),
+        path: path.resolve(__dirname, '../workbench-sandbox'),
         libraryTarget: 'amd'
     },
     module: {
