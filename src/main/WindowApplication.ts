@@ -2,38 +2,50 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:21:25
+ * @LastEditTime: 2023-08-22 14:00:46
  * @Description: 主窗口模块 对应每个打开的窗口进程
  */
 import { app, BrowserWindow } from 'electron';
-import { IInstantiationService } from '../IOC/InstantiationService'
+import { IInstantiationService } from '../common/IOC/InstantiationService'
+import { SyncDescriptor } from '../common/IOC/serviceCollection';
+import { Workbench } from '../workbench/Workbench'
 
-
-export class WindowMainService implements IWindowMainService {
+export class WindowApplicationService implements IWindowApplicationService {
 
     private _win?: BrowserWindow
     private _id?: number
 
-    // 注入所需实例
+    // 注入所需子服务实例
     constructor(
         @IInstantiationService instantiationService: IInstantiationService
+
+
     ) {
-        console.log(instantiationService);
         this.open()
+        this.createServices(instantiationService)
+        
     }
 
-    createPart() {
+    // 创建窗口所需的基本服务
+    createServices(instantiationService: IInstantiationService) {
+        // const services = getGlobalCollection()
 
     }
 
     // 打开窗口
     public open() {
         app.whenReady().then(() => {
-            this.createWindow()
-            this.load()
+            this.openEmptyWindow()
         })
 
     }
+
+
+    openEmptyWindow() {
+        this.createWindow()
+        this.load()
+    }
+
     // 创建窗口
     createWindow() {
         this._win = new BrowserWindow({
@@ -52,7 +64,7 @@ export class WindowMainService implements IWindowMainService {
 
     //
 }
-export interface IWindowMainService {
+export interface IWindowApplicationService {
     open(): void
     load(): void
 }
