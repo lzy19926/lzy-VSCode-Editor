@@ -7,7 +7,7 @@
   
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron-forge start",
+    "start": "tsc && electron-forge start",
     "make": "electron-forge make",
     "watch":"tsc --watch"
   },
