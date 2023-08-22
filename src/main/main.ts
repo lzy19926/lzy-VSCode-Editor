@@ -2,15 +2,22 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:16:38
+ * @LastEditTime: 2023-08-22 11:56:04
  * @Description: 
  */
 
 
 import { app, dialog } from 'electron';
-import { ServiceCollection, SyncDescriptor } from '../IOC/serviceCollection'
+import { getGlobalCollection, SyncDescriptor } from '../IOC/serviceCollection'
 import { InstantiationService, IInstantiationService } from '../IOC/InstantiationService'
 import { WindowMainService, IWindowMainService } from './windowMainService';
+import type { ServiceCollection } from '../IOC/serviceCollection'
+import { INlsService } from '../common/NlsService';
+import { IFileService } from '../common/FileService';
+import { IPerformanceService } from '../common/PerformanceService';
+import { IWindowService } from '../common/WindowService';
+
+
 
 class CodeMain {
 
@@ -25,7 +32,7 @@ class CodeMain {
         }
     }
 
-
+    // 
     private async startUp() {
         // 初始化service
         const [services, instantiationService] = this.createServices()
@@ -36,14 +43,24 @@ class CodeMain {
         this.openFirstWindow(instantiationService)
     }
 
-
-
     //初始创建并保存第一批服务
     createServices(): [ServiceCollection, InstantiationService] {
-        const services = new ServiceCollection()
+        const services = getGlobalCollection()
 
         const instantiationService = new InstantiationService(services)
         services.set(IInstantiationService, instantiationService)
+
+        const nlsService = instantiationService.createInstance(services.get(INlsService))
+        services.set(INlsService, nlsService)
+
+        const fileService = instantiationService.createInstance(services.get(IFileService))
+        services.set(IFileService, fileService)
+
+        const performanceService = instantiationService.createInstance(services.get(IPerformanceService))
+        services.set(IPerformanceService, performanceService)
+
+        const windowService = instantiationService.createInstance(services.get(IWindowService))
+        services.set(IWindowService, windowService)
 
         return [services, instantiationService]
     }
