@@ -2,14 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-21 12:12:10
+ * @LastEditTime: 2023-08-22 11:12:58
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 
 
 import type { ServiceIdentifier, Dependency } from './decorator'
 import { SyncDescriptor, ServiceCollection } from './serviceCollection'
-
+import { createDecorator } from './decorator'
 
 type StackNode = {
     name: string
@@ -24,7 +24,7 @@ export class InstantiationService {
         private readonly _services: ServiceCollection
     ) { }
 
-    public createInstance(descriptor: SyncDescriptor<any>): any {
+    public createInstance<T>(descriptor: SyncDescriptor<T>): T {
         const ctor = descriptor.ctor  // 构造函数
         const staticArgs = descriptor.staticArguments // 静态参数
         const serviceArgs: any[] = [];                // 注入的Services
@@ -113,3 +113,11 @@ export class InstantiationService {
         return { name, id, desc }
     }
 }
+
+
+export interface IInstantiationService {
+    createInstance(): any
+    getServiceInstanceOrDescriptor<T>(id: ServiceIdentifier<T>): T | SyncDescriptor<T>
+}
+
+export const IInstantiationService = createDecorator<IInstantiationService>("IInstantiationService")
