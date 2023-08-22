@@ -6,8 +6,8 @@
  * @Description: 
  */
 
-import { createDecorator } from '../IOC/decorator'
-import { registerSingleton } from '../IOC/serviceCollection'
+import { createDecorator } from './IOC/decorator'
+import { registerSingleton } from './IOC/serviceCollection'
 
 export class WindowService { }
 
