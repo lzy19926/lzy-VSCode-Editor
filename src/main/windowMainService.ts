@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-21 22:21:12
+ * @LastEditTime: 2023-08-22 10:46:15
  * @Description: 主窗口模块 对应每个打开的窗口进程
  */
 import { app, BrowserWindow } from 'electron';
@@ -44,6 +44,8 @@ export class WindowMainService implements IWindowMainService {
 
         this._win.loadURL('E:/VS_Code/myVSCode/src/workbench/static/workbench.html')
     }
+
+    //
 }
 
 

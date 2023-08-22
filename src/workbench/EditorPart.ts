@@ -13,7 +13,12 @@ class EditorPart {
     constructor() {
         this._editor = undefined
     }
-    
 
 
+    create() { }
+
+
+    loadMonaco() { 
+        
+    }
 }

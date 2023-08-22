@@ -24,5 +24,3 @@ function loadMonaco() {
 }
 
 loadMonaco()
-
-console.log("load editor source successfully");
