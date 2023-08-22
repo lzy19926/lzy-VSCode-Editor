@@ -22,7 +22,7 @@ export class ServiceCollection {
         return this._entries.has(id);
     }
 
-    set<T>(id: ServiceIdentifier<T>, descOrInstance: SyncDescriptor<T> | T) {
+    set<T>(id: ServiceIdentifier<T>, descOrInstance: SyncDescriptor<T> | any) {
         this._entries.set(id, descOrInstance);
     }
 

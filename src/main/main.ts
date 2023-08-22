@@ -2,16 +2,15 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-21 20:40:08
+ * @LastEditTime: 2023-08-22 11:16:38
  * @Description: 
  */
 
 
 import { app, dialog } from 'electron';
-import { ServiceCollection } from '../IOC/serviceCollection'
-import { InstantiationService } from '../IOC/InstantiationService'
-import { WindowMainService } from './windowMainService';
-
+import { ServiceCollection, SyncDescriptor } from '../IOC/serviceCollection'
+import { InstantiationService, IInstantiationService } from '../IOC/InstantiationService'
+import { WindowMainService, IWindowMainService } from './windowMainService';
 
 class CodeMain {
 
@@ -29,26 +28,34 @@ class CodeMain {
 
     private async startUp() {
         // 初始化service
-        this.createServices()
+        const [services, instantiationService] = this.createServices()
 
         //todo 初始化IpcServer
 
         // 打开第一个窗口
-        this.openFirstWindow()
+        this.openFirstWindow(instantiationService)
     }
 
 
 
-    //初始创建第一批服务
-    createServices() {
+    //初始创建并保存第一批服务
+    createServices(): [ServiceCollection, InstantiationService] {
         const services = new ServiceCollection()
 
         const instantiationService = new InstantiationService(services)
+        services.set(IInstantiationService, instantiationService)
+
+        return [services, instantiationService]
     }
 
     // 打开第一个窗口
-    openFirstWindow() {
-        new WindowMainService().open()
+    openFirstWindow(instantiationService: InstantiationService) {
+
+        // 此时windowMainService即是接口类型
+        const desc = new SyncDescriptor(WindowMainService)
+        const windowMainService = instantiationService.createInstance<IWindowMainService>(desc)
+
+        windowMainService.open()
     }
 
 
