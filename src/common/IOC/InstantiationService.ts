@@ -116,7 +116,7 @@ export class InstantiationService {
 
 
 export interface IInstantiationService {
-    createInstance(): any
+    createInstance<T>(descriptor: SyncDescriptor<T>): T
     getServiceInstanceOrDescriptor<T>(id: ServiceIdentifier<T>): T | SyncDescriptor<T>
 }
 

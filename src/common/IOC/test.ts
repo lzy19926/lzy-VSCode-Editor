@@ -1,6 +1,13 @@
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-20 15:32:56
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-22 13:05:53
+ * @Description: 
+ */
 import { createDecorator } from './decorator'
 import { InstantiationService } from './InstantiationService'
-import { ServiceCollection, SyncDescriptor } from './serviceCollection'
+import { ServiceCollection, SyncDescriptor, registerSingleton } from './serviceCollection'
 
 
 
@@ -13,13 +20,13 @@ const services = new ServiceCollection()
 interface IBar { }
 class Bar implements IBar { }
 const IBar = createDecorator<IBar>('IBar');
-services.registerSingleton(IBar, Bar)
+registerSingleton(IBar, Bar)
 
 
 interface ITab { }
 class Tab implements ITab { }
 const ITab = createDecorator<ITab>('ITab');
-services.registerSingleton(ITab, Tab)
+registerSingleton(ITab, Tab)
 
 
 interface IEditor { }
@@ -30,7 +37,7 @@ class Editor implements IEditor {
     ) { }
 }
 const IEditor = createDecorator<IEditor>('IEditor');
-services.registerSingleton(IEditor, Editor)
+registerSingleton(IEditor, Editor)
 
 
 
