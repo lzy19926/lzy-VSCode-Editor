@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:29:07
+ * @LastEditTime: 2023-08-22 18:35:44
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -16,24 +16,14 @@ export class EditorPart implements IEditorService, Part {
 
     constructor() { }
 
-    // 创建编辑器
-    create(container: HTMLElement) {
-
-        this._container = container
-
-        this.updateStyle()
-        this.loadMonacoStyle()
-        this.loadMonaco()
-    }
-
     // 更新容器样式
-    updateStyle() {
-        this._container.style.height = "500px"
+    private updateStyle() {
+        this._container.style.height = "95%"
     }
 
     // 加载monaco-editor
     //todo 这里需要解决路径问题
-    loadMonaco() {
+    private loadMonaco() {
 
         const requireConfig = { paths: { 'vs': '../node_modules/monaco-editor/min/vs' } };
         const require: any = window.require // 解决ts报错
@@ -43,7 +33,7 @@ export class EditorPart implements IEditorService, Part {
 
             var options = {
                 value: '// 在此处输入您的代码',
-                language: 'javascript',
+                language: 'typescript',
                 theme: "vs-dark"
             };
 
@@ -54,17 +44,33 @@ export class EditorPart implements IEditorService, Part {
     }
 
     // 加载monaco-editor样式文件
-    loadMonacoStyle() {
+    private loadMonacoStyle() {
         var link = document.createElement('link');
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = "../node_modules/monaco-editor/min/vs/editor/editor.main.css";
         document.getElementsByTagName('head')[0].appendChild(link);
     }
+
+    // 创建编辑器
+    public create(container: HTMLElement) {
+
+        this._container = container
+
+        this.updateStyle()
+        this.loadMonacoStyle()
+        this.loadMonaco()
+    }
+
+    // 编辑器加载文件
+    public loadFileContent(text: string) {
+        this._editor.getModel().setValue(text)
+    }
 }
 
 export interface IEditorService {
-
+    create(container: HTMLElement): void
+    loadFileContent(text: string): void
 }
 
 export const IEditorService = createDecorator<IEditorService>("IEditorService")
