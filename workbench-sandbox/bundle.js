@@ -25,9 +25,9 @@ exports.Workbench = exports.Parts = void 0;
  */
 const EditorPart_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
-const TitleBar_1 = __webpack_require__(5);
+const TitleBar_1 = __webpack_require__(6);
 const serviceCollection_1 = __webpack_require__(3);
-const InstantiationService_1 = __webpack_require__(6);
+const InstantiationService_1 = __webpack_require__(7);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -249,37 +249,6 @@ exports.getGlobalCollection = getGlobalCollection;
 
 /***/ }),
 /* 4 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-/*
- * @Author: Luzy
- * @Date: 2023-08-22 11:36:46
- * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:59:27
- * @Description: 左侧文件资源管理器view模块
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ISideBarService = exports.SideBarPart = void 0;
-const decorator_1 = __webpack_require__(2);
-const serviceCollection_1 = __webpack_require__(3);
-class SideBarPart {
-    _container;
-    constructor(
-    //  @IEditorService private readonly editorService: IEditorService
-    ) {
-    }
-    create(container) {
-        this._container = container;
-    }
-}
-exports.SideBarPart = SideBarPart;
-exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
-(0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
-
-
-/***/ }),
-/* 5 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -287,7 +256,198 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 19:00:03
+ * @LastEditTime: 2023-08-24 15:40:25
+ * @Description: 左侧文件资源管理器view模块
+ */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ISideBarService = exports.SideBarPart = void 0;
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+const EditorPart_1 = __webpack_require__(1);
+const treeView_1 = __webpack_require__(5);
+let SideBarPart = exports.SideBarPart = class SideBarPart {
+    editorService;
+    _container;
+    constructor(editorService) {
+        this.editorService = editorService;
+    }
+    create(container) {
+        this._container = container;
+        this.renderFileList();
+    }
+    //todo 渲染文件列表测试
+    renderFileList() {
+        // 测试数据
+        const data = [
+            {
+                name: 'Node1',
+                children: [
+                    { name: 'Node1-1' },
+                    { name: 'Node1-2' }
+                ]
+            },
+            {
+                name: 'Node2',
+                children: [
+                    {
+                        name: 'Node2-1', children: [
+                            { name: 'Node2-1-1' },
+                        ]
+                    },
+                ]
+            },
+        ];
+        // 创建 TreeList 实例并渲染到指定元素中。
+        let tree = new treeView_1.TreeListView(data, this._container);
+    }
+};
+exports.SideBarPart = SideBarPart = __decorate([
+    __param(0, EditorPart_1.IEditorService)
+], SideBarPart);
+exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
+(0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
+
+
+/***/ }),
+/* 5 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-24 12:04:24
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-24 16:14:53
+ * @Description: 树状列表组件 用于文件展示等功能
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TreeListView = void 0;
+// 根据树结构创建节点对象
+function createNodeTree(data) {
+    const root = new TreeNode('root');
+    data.forEach((item) => {
+        let node = new TreeNode(item.name);
+        if (item.children && item.children.length > 0) {
+            const childrenNodes = createNodeTree(item.children);
+            childrenNodes.children.forEach(child => node.addChild(child));
+        }
+        root.addChild(node);
+    });
+    return root;
+}
+// 节点类
+class TreeNode {
+    id;
+    name;
+    children;
+    expanded;
+    constructor(name) {
+        this.id = name;
+        this.name = name;
+        this.children = [];
+        this.expanded = false; // 是否展开节点
+    }
+    addChild(node) {
+        this.children.push(node);
+    }
+}
+// 列表组件类
+class TreeListView {
+    data;
+    rootNode;
+    constructor(data, container) {
+        this.data = data;
+        this.rootNode = createNodeTree(this.data);
+        this.render(container);
+    }
+    toggleExpandStatus(event) {
+        // 收起或者展开树形列表项。如果点击区域在子列表上则不切换收起状态。
+        const el = event.target;
+        if (el.classList.contains("node__name")) {
+            const nodeElement = el.closest(".node");
+            const nodeId = nodeElement.dataset.nodeId;
+            const currentNode = this.getNodeById(nodeId, this.rootNode);
+            if (!currentNode)
+                return;
+            currentNode.expanded = !currentNode.expanded;
+            const node__children = nodeElement.querySelector(".node__children");
+            const expand_icon = nodeElement.querySelector(".expand_icon");
+            if (currentNode.expanded == true) {
+                node__children.classList.remove("hidden");
+                if (expand_icon.innerText.length > 0) {
+                    expand_icon.innerText = "-";
+                }
+            }
+            else {
+                node__children.classList.add("hidden");
+                if (expand_icon.innerText.length > 0) {
+                    expand_icon.innerText = "+";
+                }
+            }
+        }
+    }
+    // 递归地获取树形结构的 HTML Text
+    getHtmlFromTreeNode(treeRootNode, floor) {
+        const result = [];
+        treeRootNode.children.forEach(childNode => {
+            let icon = childNode.children.length > 0 ? '+' : '';
+            let childrenHtml = this.getHtmlFromTreeNode(childNode, floor + 1);
+            let spaces = Array(floor).fill('&nbsp&nbsp&nbsp').join('');
+            let node = `
+                    <div class="node ${icon ? 'has-children' : ''}" data-node-id="${childNode.id}">
+                        <span>${spaces}</span>
+                        <span class="expand_icon">${icon}</span>
+                        <span class="node__name">${childNode.name}</span>
+                    	<div class ="node__children hidden">
+                        	${childrenHtml}
+                       </div>
+                  </div>`;
+            result.push(node);
+        });
+        return result.join('');
+    }
+    // 渲染整个树状列表结构到指定选择器中。
+    render(container) {
+        const list = container;
+        const html = this.getHtmlFromTreeNode(this.rootNode, 0);
+        // 添加事件监听函数
+        list.addEventListener("click", this.toggleExpandStatus.bind(this));
+        list.innerHTML = `<ul>${html}</ul>`;
+    }
+    // 根据 id 查找节点，如果未找到返回 null - DFS 
+    getNodeById(id, treeRoot = this.rootNode) {
+        if (treeRoot.id === id)
+            return treeRoot;
+        for (let i = 0; i < treeRoot.children.length; i++) {
+            const match = this.getNodeById(id, treeRoot.children[i]);
+            if (match !== null)
+                return match;
+        }
+        return null;
+    }
+}
+exports.TreeListView = TreeListView;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-22 11:36:46
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-24 16:30:18
  * @Description: 顶部导航菜单栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -313,6 +473,7 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     create(container) {
         this._container = container;
         this.createOpenFileBtn();
+        this.createOpenDirBtn();
         this.saveFileBtn();
     }
     // 保存文件按钮
@@ -320,7 +481,14 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
         const editor = this.editorService;
         const btn = document.createElement("button");
         btn.innerText = "保存文件测试";
-        btn.onclick = this.readFileTest.bind(this);
+        this._container.appendChild(btn);
+    }
+    // 打开文件夹按钮
+    createOpenDirBtn() {
+        const btn = document.createElement("input");
+        btn.innerText = "打开文件夹测试";
+        btn.onclick = () => {
+        };
         this._container.appendChild(btn);
     }
     // 打开文件按钮
@@ -356,7 +524,7 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -364,13 +532,26 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:53:16
+ * @LastEditTime: 2023-08-24 15:32:02
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IInstantiationService = exports.InstantiationService = void 0;
 const serviceCollection_1 = __webpack_require__(3);
 const decorator_1 = __webpack_require__(2);
+// 检查是实例还是描述符
+function checkDescOrInstance(descOrInstance) {
+    const isDesc = (descOrInstance instanceof serviceCollection_1.SyncDescriptor);
+    if (isDesc) {
+        return "desc";
+    }
+    else if (typeof descOrInstance !== 'undefined' && !isDesc) {
+        return "instance";
+    }
+    else {
+        return "unknow";
+    }
+}
 // 实例化服务, 用于将单个服务进行实例化,并提供注入依赖逻辑
 class InstantiationService {
     _services;
@@ -407,6 +588,11 @@ class InstantiationService {
     // 通过服务的唯一标识符 实例化被依赖的服务
     // DFS遍历所有的服务并实例化保存到collection上  最后返回服务实例
     createAndCacheServiceInstance(dependency) {
+        // 实例或描述符判断  
+        const descOrInstance = this._services.get(dependency.id);
+        if (checkDescOrInstance(descOrInstance) == "instance") {
+            return descOrInstance;
+        }
         // 构造第一个节点
         const firstNode = this.createStackNode(dependency);
         // DFS遍历service的依赖  实例化子依赖
@@ -420,11 +606,14 @@ class InstantiationService {
             if (cycleCount++ > 1000) {
                 throw new Error("侦测到循环依赖");
             }
+            //todo (有可能这里已经是实例了 不是Desc  故无法获取id$dependences)
+            if (checkDescOrInstance(item.desc) !== 'desc')
+                break;
             // 继续获取子依赖
             const serviceDependencies = item.desc.ctor["id$dependences"] || [];
             for (const dependency of serviceDependencies) {
-                const node = this.createStackNode(dependency);
                 // 实例化子服务
+                const node = this.createStackNode(dependency);
                 this.createAndCacheServiceInstance(dependency);
                 graph.push(node);
                 stack.push(node);
