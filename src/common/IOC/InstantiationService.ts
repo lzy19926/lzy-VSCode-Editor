@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 15:32:02
+ * @LastEditTime: 2023-08-24 23:51:39
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 
@@ -37,7 +37,16 @@ export class InstantiationService {
         private readonly _services: ServiceCollection
     ) { }
 
-    public createInstance<T>(descriptor: SyncDescriptor<T>): T {
+    // 创建实例
+    public createInstance<T>(descOrInstance: SyncDescriptor<T> | T): T {
+        if (checkDescOrInstance(descOrInstance) == 'instance') {
+            return descOrInstance as T
+        } else {
+            return this._createInstance(descOrInstance as SyncDescriptor<T>)
+        }
+    }
+
+    public _createInstance<T>(descriptor: SyncDescriptor<T>): T {
         const ctor = descriptor.ctor  // 构造函数
         const staticArgs = descriptor.staticArguments // 静态参数
         const serviceArgs: any[] = [];                // 注入的Services
