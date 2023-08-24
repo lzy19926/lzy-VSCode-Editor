@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:53:16
+ * @LastEditTime: 2023-08-24 15:32:02
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 
@@ -18,6 +18,19 @@ type StackNode = {
 }
 
 
+// 检查是实例还是描述符
+function checkDescOrInstance(descOrInstance: any) {
+    const isDesc = (descOrInstance instanceof SyncDescriptor)
+    if (isDesc) {
+        return "desc"
+    }
+    else if (typeof descOrInstance !== 'undefined' && !isDesc) {
+        return "instance"
+    } else {
+        return "unknow"
+    }
+}
+
 // 实例化服务, 用于将单个服务进行实例化,并提供注入依赖逻辑
 export class InstantiationService {
     constructor(
@@ -32,12 +45,11 @@ export class InstantiationService {
 
         // 将装饰器注入的服务取出并进行实例化
         // 装饰器保存依赖描述符到数组中
-       
         const serviceDependencies = ctor["id$dependences"] || []
 
         for (const dependency of serviceDependencies) {
             const service = this.getOrCreateServiceInstance(dependency)
-             // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
+            // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
             serviceArgs.unshift(service)
         }
 
@@ -65,6 +77,13 @@ export class InstantiationService {
     // DFS遍历所有的服务并实例化保存到collection上  最后返回服务实例
     private createAndCacheServiceInstance<T>(dependency: Dependency<T>) {
 
+
+        // 实例或描述符判断  
+        const descOrInstance = this._services.get(dependency.id)
+        if (checkDescOrInstance(descOrInstance) == "instance") {
+            return descOrInstance
+        }
+
         // 构造第一个节点
         const firstNode = this.createStackNode(dependency)
 
@@ -82,13 +101,15 @@ export class InstantiationService {
                 throw new Error("侦测到循环依赖")
             }
 
+            //todo (有可能这里已经是实例了 不是Desc  故无法获取id$dependences)
+            if (checkDescOrInstance(item.desc) !== 'desc') break
+
             // 继续获取子依赖
             const serviceDependencies = item.desc.ctor["id$dependences"] || []
 
             for (const dependency of serviceDependencies) {
-
-                const node = this.createStackNode(dependency)
                 // 实例化子服务
+                const node = this.createStackNode(dependency)
                 this.createAndCacheServiceInstance(dependency)
 
                 graph.push(node)
@@ -112,6 +133,7 @@ export class InstantiationService {
 
         return { name, id, desc }
     }
+
 }
 
 
