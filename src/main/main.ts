@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 17:35:49
+ * @LastEditTime: 2023-08-24 23:40:30
  * @Description: 
  */
 
@@ -16,7 +16,7 @@ import { INlsService } from '../common/NlsService';
 import { IFileService } from '../common/FileService';
 import { IPerformanceService } from '../common/PerformanceService';
 import { IWindowService } from '../common/WindowService';
-
+import { IProtocolService } from '../common/ProtocolService'
 class CodeMain {
 
     // 入口启动函数
@@ -60,6 +60,9 @@ class CodeMain {
         const windowService = instantiationService.createInstance(services.get(IWindowService))
         services.set(IWindowService, windowService)
 
+        const protocolService = instantiationService.createInstance(services.get(IProtocolService))
+        services.set(IProtocolService, protocolService)
+
         return [services, instantiationService]
     }
 
@@ -76,3 +79,11 @@ class CodeMain {
 // Main Startup
 const code = new CodeMain()
 code.main()
+
+
+
+
+
+
+
+
