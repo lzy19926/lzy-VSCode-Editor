@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 17:35:36
+ * @LastEditTime: 2023-08-24 17:40:08
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -92,7 +92,7 @@ export class FileService {
             };
 
             if (node.isDir) {
-                node.children = createFileTree(absolutePath, node); // Recursively iterate over child directories.
+                node.children = this._parseFileTree(absolutePath, node); // Recursively iterate over child directories.
             }
 
             return node;
