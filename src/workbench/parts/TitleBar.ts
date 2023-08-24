@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 19:00:03
+ * @LastEditTime: 2023-08-24 16:30:18
  * @Description: 顶部导航菜单栏
  */
 
@@ -24,8 +24,9 @@ export class TitleBarPart implements ITitleBarService, Part {
     create(container: HTMLElement): void {
 
         this._container = container
-        
+
         this.createOpenFileBtn()
+        this.createOpenDirBtn()
         this.saveFileBtn()
     }
 
@@ -36,7 +37,17 @@ export class TitleBarPart implements ITitleBarService, Part {
         const editor = this.editorService
         const btn = document.createElement("button")
         btn.innerText = "保存文件测试"
-        btn.onclick = this.readFileTest.bind(this)
+        this._container.appendChild(btn)
+    }
+
+
+    // 打开文件夹按钮
+    createOpenDirBtn() {
+        const btn = document.createElement("input")
+        btn.innerText = "打开文件夹测试"
+        btn.onclick = () => {
+          
+        }
         this._container.appendChild(btn)
     }
     // 打开文件按钮
