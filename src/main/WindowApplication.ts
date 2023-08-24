@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 17:21:56
+ * @LastEditTime: 2023-08-25 00:12:09
  * @Description: 主窗口模块 对应每个打开的窗口App
  */
 import { app, BrowserWindow } from 'electron';
@@ -55,10 +55,6 @@ export class WindowApplicationService implements IWindowApplicationService {
     load() {
         if (!this._win) return
         this._win.loadURL('E:/VS_Code/myVSCode/workbench-sandbox/workbench.html')
-
-
-        //  ! 测试用加载文件方法 待删除
-        this.fileService.openDir()
     }
 }
 export interface IWindowApplicationService {

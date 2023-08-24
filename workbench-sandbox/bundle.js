@@ -256,7 +256,7 @@ exports.getGlobalCollection = getGlobalCollection;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 15:40:25
+ * @LastEditTime: 2023-08-25 00:53:34
  * @Description: 左侧文件资源管理器view模块
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -282,32 +282,20 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
     }
     create(container) {
         this._container = container;
-        this.renderFileList();
     }
-    //todo 渲染文件列表测试
-    renderFileList() {
-        // 测试数据
-        const data = [
-            {
-                name: 'Node1',
-                children: [
-                    { name: 'Node1-1' },
-                    { name: 'Node1-2' }
-                ]
-            },
-            {
-                name: 'Node2',
-                children: [
-                    {
-                        name: 'Node2-1', children: [
-                            { name: 'Node2-1-1' },
-                        ]
-                    },
-                ]
-            },
-        ];
+    // 渲染文件列表
+    renderFileList(fileTree) {
         // 创建 TreeList 实例并渲染到指定元素中。
-        let tree = new treeView_1.TreeListView(data, this._container);
+        let tree = new treeView_1.TreeListView([fileTree], this._container);
+    }
+    // 渲染单个文件
+    renderFileContent() {
+        fetch('lzy://api/getFileContent')
+            .then(response => response.json())
+            .then(data => {
+            console.log(data);
+            this.editorService.loadFileContent("11");
+        });
     }
 };
 exports.SideBarPart = SideBarPart = __decorate([
@@ -326,7 +314,7 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 16:14:53
+ * @LastEditTime: 2023-08-25 00:56:48
  * @Description: 树状列表组件 用于文件展示等功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -443,13 +431,6 @@ exports.TreeListView = TreeListView;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
-/*
- * @Author: Luzy
- * @Date: 2023-08-22 11:36:46
- * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 16:30:18
- * @Description: 顶部导航菜单栏
- */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -461,33 +442,42 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ITitleBarService = exports.TitleBarPart = void 0;
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-22 11:36:46
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-25 01:00:19
+ * @Description: 顶部导航菜单栏
+ */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const EditorPart_1 = __webpack_require__(1);
+const SideBar_1 = __webpack_require__(4);
 let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     editorService;
+    sideBarService;
     _container;
-    constructor(editorService) {
+    constructor(editorService, sideBarService) {
         this.editorService = editorService;
+        this.sideBarService = sideBarService;
     }
     create(container) {
         this._container = container;
         this.createOpenFileBtn();
         this.createOpenDirBtn();
-        this.saveFileBtn();
-    }
-    // 保存文件按钮
-    saveFileBtn() {
-        const editor = this.editorService;
-        const btn = document.createElement("button");
-        btn.innerText = "保存文件测试";
-        this._container.appendChild(btn);
     }
     // 打开文件夹按钮
     createOpenDirBtn() {
-        const btn = document.createElement("input");
+        const btn = document.createElement("button");
         btn.innerText = "打开文件夹测试";
+        //todo----------
         btn.onclick = () => {
+            fetch('lzy://api/getFiles')
+                .then(response => response.json())
+                .then(data => {
+                const fileTree = data.data;
+                this.sideBarService.renderFileList(fileTree);
+            });
         };
         this._container.appendChild(btn);
     }
@@ -499,7 +489,7 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
         btn.onchange = this.readFileTest.bind(this);
         this._container.appendChild(btn);
     }
-    // 加载文件测试
+    // 加载文件按钮
     readFileTest(event) {
         /**@ts-ignore*/
         const file = event.target?.files?.[0];
@@ -517,7 +507,8 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     }
 };
 exports.TitleBarPart = TitleBarPart = __decorate([
-    __param(0, EditorPart_1.IEditorService)
+    __param(0, EditorPart_1.IEditorService),
+    __param(1, SideBar_1.ISideBarService)
 ], TitleBarPart);
 exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ITitleBarService, TitleBarPart);
@@ -532,7 +523,7 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 15:32:02
+ * @LastEditTime: 2023-08-24 23:51:39
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -558,7 +549,16 @@ class InstantiationService {
     constructor(_services) {
         this._services = _services;
     }
-    createInstance(descriptor) {
+    // 创建实例
+    createInstance(descOrInstance) {
+        if (checkDescOrInstance(descOrInstance) == 'instance') {
+            return descOrInstance;
+        }
+        else {
+            return this._createInstance(descOrInstance);
+        }
+    }
+    _createInstance(descriptor) {
         const ctor = descriptor.ctor; // 构造函数
         const staticArgs = descriptor.staticArguments; // 静态参数
         const serviceArgs = []; // 注入的Services

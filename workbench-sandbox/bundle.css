@@ -2,10 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 15:42:39
- * @Description: 全局标准样式
+ * @LastEditTime: 2023-08-25 00:31:05
+ * @Description: 
  */
 
+/* ! 现在所有的css先写在这里  之后需要拆分 */
+
+/* ! --------- 全局标准样式  */
 body {
     margin: 0;
     padding: 0;
@@ -38,6 +41,16 @@ body {
 }
 
 
+/* ! --------- 左侧菜单栏样式  */
+
 .hidden {
     display: none;
+}
+
+ul {
+    padding: 5px;
+}
+
+.node__name {
+    font-size: small;
 }

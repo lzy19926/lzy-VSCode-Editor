@@ -2,13 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 16:30:18
+ * @LastEditTime: 2023-08-25 01:00:19
  * @Description: 顶部导航菜单栏
  */
-
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { IEditorService } from './EditorPart'
+import { ISideBarService } from './SideBar'
 import { Part } from './Part'
 
 
@@ -16,7 +16,8 @@ export class TitleBarPart implements ITitleBarService, Part {
     private _container!: HTMLElement
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService
+        @IEditorService private readonly editorService: IEditorService,
+        @ISideBarService private readonly sideBarService: ISideBarService
     ) {
 
     }
@@ -27,29 +28,29 @@ export class TitleBarPart implements ITitleBarService, Part {
 
         this.createOpenFileBtn()
         this.createOpenDirBtn()
-        this.saveFileBtn()
     }
 
-
-
-    // 保存文件按钮
-    saveFileBtn() {
-        const editor = this.editorService
-        const btn = document.createElement("button")
-        btn.innerText = "保存文件测试"
-        this._container.appendChild(btn)
-    }
 
 
     // 打开文件夹按钮
     createOpenDirBtn() {
-        const btn = document.createElement("input")
+        const btn = document.createElement("button")
         btn.innerText = "打开文件夹测试"
+
+
+        //todo----------
         btn.onclick = () => {
-          
+            fetch('lzy://api/getFiles')
+                .then(response => response.json())
+                .then(data => {
+                    const fileTree = data.data
+                    this.sideBarService.renderFileList(fileTree)
+                })
         }
+
         this._container.appendChild(btn)
     }
+
     // 打开文件按钮
     createOpenFileBtn() {
         const btn = document.createElement("input")
@@ -59,7 +60,7 @@ export class TitleBarPart implements ITitleBarService, Part {
         this._container.appendChild(btn)
     }
 
-    // 加载文件测试
+    // 加载文件按钮
     readFileTest(event: Event) {
         /**@ts-ignore*/
         const file = event.target?.files?.[0]
