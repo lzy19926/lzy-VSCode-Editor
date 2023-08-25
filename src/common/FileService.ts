@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 17:40:08
+ * @LastEditTime: 2023-08-25 12:11:40
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -24,10 +24,8 @@ type FileTreeNode = {
 export class FileService {
     constructor() { }
 
-    // 打开对话框
-    // 渲染进程无法获取系统数据  故在主进程中获取  并于渲染进程通信
-    openDir() {
-        this.testOpenDirectory()
+    public getFileBuffer(absolutePath: string): Buffer {
+        return fs.readFileSync(absolutePath)
     }
 
     testOpenFile() {
@@ -44,17 +42,14 @@ export class FileService {
         });
     }
 
+    // 打开对话框 获取文件夹内文件树
+    // 渲染进程无法获取系统数据  故在主进程中获取  并于渲染进程通信
+    public async getFileTreeFromDir(): Promise<FileTreeNode | undefined> {
+        const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
 
-    testOpenDirectory() {
-        dialog.showOpenDialog({ properties: ['openDirectory'] })
-            .then(result => {
-                if (!result.canceled) {
-                    const dirPath = result.filePaths[0];
-                    this.parseFileTree(dirPath)
-                }
-            }).catch(err => {
-                console.log(err);
-            });
+        return !result.canceled
+            ? this.parseFileTree(result.filePaths[0])
+            : undefined
     }
 
     // 创建UI所需的文件树数据
@@ -102,7 +97,9 @@ export class FileService {
 }
 
 export interface IFileService {
-    openDir(): void
+    getFileBuffer(absolutePath: string): Buffer,
+    getFileTreeFromDir(): Promise<FileTreeNode | undefined>
+
 }
 
 export const IFileService = createDecorator<IFileService>("IFileService")
