@@ -2,24 +2,25 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:28:53
+ * @LastEditTime: 2023-08-25 17:40:05
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { Part } from './Part'
+import type { TextFileModel } from '../services/textFileService'
 
-//! 这里part同时作为EditorService  即提供服务也提供Dom结构
+
 export class EditorPart implements IEditorService, Part {
     private _editor: any
     private _container!: HTMLElement
+    _currentModel?: TextFileModel
 
     constructor() { }
 
     // 创建编辑器
     public create(container: HTMLElement) {
         this._container = container
-
         this.updateStyle()
         this.loadMonacoStyle()
         this.loadMonaco()
@@ -76,14 +77,15 @@ export class EditorPart implements IEditorService, Part {
     }
 
     // 编辑器加载文件
-    public loadFileContent(text: string) {
-        this._editor.getModel().setValue(text)
+    public loadFileModel(model: TextFileModel) {
+        this._editor.getModel().setValue(model.text)
+        this._currentModel = model
     }
 }
 
 export interface IEditorService {
     create(container: HTMLElement): void
-    loadFileContent(text: string): void
+    loadFileModel(model: TextFileModel): void
 }
 
 export const IEditorService = createDecorator<IEditorService>("IEditorService")
