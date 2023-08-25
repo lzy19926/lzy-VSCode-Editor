@@ -25,9 +25,9 @@ exports.Workbench = exports.Parts = void 0;
  */
 const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
-const TitleBar_1 = __webpack_require__(7);
+const TitleBar_1 = __webpack_require__(9);
 const serviceCollection_1 = __webpack_require__(3);
-const InstantiationService_1 = __webpack_require__(8);
+const InstantiationService_1 = __webpack_require__(10);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -90,15 +90,15 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:28:53
+ * @LastEditTime: 2023-08-25 17:51:10
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
-//! 这里part同时作为EditorService  即提供服务也提供Dom结构
 class EditorPart {
     _editor;
     _container;
+    _currentModel;
     constructor() { }
     // 创建编辑器
     create(container) {
@@ -148,8 +148,10 @@ class EditorPart {
         });
     }
     // 编辑器加载文件
-    loadFileContent(text) {
-        this._editor.getModel().setValue(text);
+    loadFileModel(model) {
+        this._editor.getModel().setValue(model.text);
+        this._currentModel = model;
+        console.log(this._currentModel);
     }
 }
 exports.EditorPart = EditorPart;
@@ -282,14 +284,15 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:05:49
+ * @LastEditTime: 2023-08-25 17:47:42
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
+const textFileService_1 = __webpack_require__(5);
 const Editor_1 = __webpack_require__(1);
-const treeView_1 = __webpack_require__(5);
-const api_1 = __importDefault(__webpack_require__(6));
+const treeView_1 = __webpack_require__(7);
+const api_1 = __importDefault(__webpack_require__(8));
 let SideBarPart = exports.SideBarPart = class SideBarPart {
     editorService;
     _container;
@@ -315,11 +318,11 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
             return;
         const fileAbsolutePath = node.origin?.absolutePath;
         const res = await api_1.default.getFileContent(fileAbsolutePath);
-        // 解析后端传来的buffer
-        const binaryArray = res.data.data;
-        const buffer = new Uint8Array(binaryArray);
-        const fileContentString = new TextDecoder().decode(buffer);
-        this.editorService.loadFileContent(fileContentString);
+        // 通过buffer创建文件Model并渲染
+        const buffer = res.data.data;
+        const model = (0, textFileService_1.createFileModel)(fileAbsolutePath, buffer);
+        // 渲染到Editor上
+        this.editorService.loadFileModel(model);
     }
 };
 exports.SideBarPart = SideBarPart = __decorate([
@@ -331,6 +334,97 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
 
 /***/ }),
 /* 5 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-25 16:42:55
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-25 17:51:28
+ * @Description: 提供前端文本对象相关功能
+ */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ITextFileService = exports.TextFileService = exports.createFileModel = void 0;
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+const cacheFileService_1 = __webpack_require__(6);
+const Editor_1 = __webpack_require__(1);
+// 创建文件对象
+function createFileModel(path, buffer) {
+    const binaryArray = new Uint8Array(buffer);
+    const fileContentString = new TextDecoder().decode(binaryArray);
+    return {
+        id: path,
+        buffer: binaryArray,
+        text: fileContentString
+    };
+}
+exports.createFileModel = createFileModel;
+let TextFileService = exports.TextFileService = class TextFileService {
+    cacheFileService;
+    editorService;
+    _currentModel; //当前编辑器中的文件对象
+    constructor(cacheFileService, editorService) {
+        this.cacheFileService = cacheFileService;
+        this.editorService = editorService;
+    }
+    // 比较编辑器文本和原文件内容
+    // todo 使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
+    diffText_test(id) {
+        const originFile = this.cacheFileService.get(id);
+        // const currentModel = this.editorService.getCurrentFileModel()
+    }
+};
+exports.TextFileService = TextFileService = __decorate([
+    __param(0, cacheFileService_1.ICacheFileService),
+    __param(1, Editor_1.IEditorService)
+], TextFileService);
+exports.ITextFileService = (0, decorator_1.createDecorator)("ITextFileService");
+(0, serviceCollection_1.registerSingleton)(exports.ITextFileService, TextFileService);
+
+
+/***/ }),
+/* 6 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-25 16:56:06
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-25 17:21:32
+ * @Description: 提供文本文件前端缓存功能
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ICacheFileService = exports.CacheFileService = void 0;
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+class CacheFileService {
+    _cache = new Map();
+    get(id) {
+        return this._cache.get(id);
+    }
+    set(id, model) {
+        this._cache.set(id, model);
+    }
+}
+exports.CacheFileService = CacheFileService;
+exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService");
+(0, serviceCollection_1.registerSingleton)(exports.ICacheFileService, CacheFileService);
+
+
+/***/ }),
+/* 7 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -475,7 +569,7 @@ exports.TreeListView = TreeListView;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -483,7 +577,7 @@ exports.TreeListView = TreeListView;
  * @Author: Luzy
  * @Date: 2023-08-25 14:35:42
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 14:54:18
+ * @LastEditTime: 2023-08-25 16:29:16
  * @Description: 该文件夹定义所有渲染进程需要调用的API
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -505,10 +599,11 @@ exports["default"] = {
     getFileTreeFromDir,
     getFileContent
 };
+// 保存文件的的的的
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -530,14 +625,14 @@ exports.ITitleBarService = exports.TitleBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:13:25
+ * @LastEditTime: 2023-08-25 17:49:43
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
-const api_1 = __importDefault(__webpack_require__(6));
+const api_1 = __importDefault(__webpack_require__(8));
 let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     editorService;
     sideBarService;
@@ -572,21 +667,22 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
         const fileTree = res.data;
         this.sideBarService.renderFileList(fileTree);
     }
-    // 按钮事件 加载单个文件
+    //todo 需要重写 按钮事件 加载单个文件
     event_loadFileContent(event) {
-        /**@ts-ignore*/
-        const file = event.target?.files?.[0];
-        const editor = this.editorService;
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const text = reader.result;
-                if (typeof text == 'string') {
-                    editor.loadFileContent(text);
-                }
-            };
-            reader.readAsText(file);
-        }
+        alert("该功能暂不可用");
+        // /**@ts-ignore*/
+        // const file = event.target?.files?.[0]
+        // const editor = this.editorService
+        // if (file) {
+        //     const reader = new FileReader();
+        //     reader.onload = () => {
+        //         const text = reader.result;
+        //         if (typeof text == 'string') {
+        //             // editor.loadFileContent(text)
+        //         }
+        //     };
+        //     reader.readAsText(file);
+        // }
     }
 };
 exports.TitleBarPart = TitleBarPart = __decorate([
@@ -598,7 +694,7 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
