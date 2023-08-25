@@ -2,13 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 00:58:18
+ * @LastEditTime: 2023-08-25 12:11:26
  * @Description: 提供内置协议管理的服务  浏览器-Node进程通信使用该协议
  */
 import { protocol, app } from 'electron';
 import { createDecorator } from './IOC/decorator'
 import { getGlobalCollection, registerSingleton } from './IOC/serviceCollection'
-
+import { parseUrlQuery } from './utils'
 
 export class ProtocolService {
 
@@ -89,11 +89,13 @@ function router(req: EReq, cb: ResCb, c: Controller) {
     console.log(req);
 
     const { url } = req
+    const urlPart = url.split("?")[0]
+    const params = parseUrlQuery(url)
 
-    switch (url) {
-        case "lzy://api/getFiles": c.getFiles(req, cb)
+    switch (urlPart) {
+        case "lzy://api/getFiles": c.getFiles(params, cb)
             break;
-        case "lzy://api/getFileContent": c.getFileContent(req, cb)
+        case "lzy://api/getFileContent": c.getFileContent(params, cb)
             break;
         default:
     }
@@ -122,7 +124,7 @@ class Controller {
 
 
     // 通过文件夹路径获取文件树
-    getFiles(req: EReq, callback: ResCb) {
+    getFiles(params: Record<string, string>, callback: ResCb) {
 
         const fileService = getFileService()
 
@@ -139,12 +141,11 @@ class Controller {
 
     }
 
-    getFileContent(req: EReq, callback: ResCb) {
-
-        console.log(req);
-
+    getFileContent(params: Record<string, string>, callback: ResCb) {
+        console.log(params);
+        const path = params.path
         const fileService = getFileService()
-        const fileBuffer = fileService.getFileText("E:/VS_Code/myVSCode/src/main/main.ts")
+        const fileBuffer = fileService.getFileBuffer(path)
 
         const response = {
             statusCode: 200,
