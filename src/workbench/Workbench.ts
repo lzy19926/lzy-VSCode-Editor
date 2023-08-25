@@ -5,7 +5,7 @@
  * @LastEditTime: 2023-08-22 18:59:48
  * @Description: 运行于浏览器端的编辑器主模块
  */
-import { IEditorService } from './parts/EditorPart'
+import { IEditorService } from './parts/Editor'
 import { ISideBarService } from './parts/SideBar'
 import { ITitleBarService } from './parts/TitleBar'
 import { SyncDescriptor, getGlobalCollection } from '../common/IOC/serviceCollection';

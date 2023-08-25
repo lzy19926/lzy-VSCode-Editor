@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:35:44
+ * @LastEditTime: 2023-08-25 15:07:25
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -16,6 +16,15 @@ export class EditorPart implements IEditorService, Part {
 
     constructor() { }
 
+    // 创建编辑器
+    public create(container: HTMLElement) {
+        this._container = container
+
+        this.updateStyle()
+        this.loadMonacoStyle()
+        this.loadMonaco()
+    }
+
     // 更新容器样式
     private updateStyle() {
         this._container.style.height = "95%"
@@ -24,13 +33,11 @@ export class EditorPart implements IEditorService, Part {
     // 加载monaco-editor
     //todo 这里需要解决路径问题
     private loadMonaco() {
-
         const requireConfig = { paths: { 'vs': '../node_modules/monaco-editor/min/vs' } };
         const require: any = window.require // 解决ts报错
         require.config(requireConfig);
 
         require(['vs/editor/editor.main'], () => {
-
             var options = {
                 value: '// 在此处输入您的代码',
                 language: 'typescript',
@@ -50,16 +57,6 @@ export class EditorPart implements IEditorService, Part {
         link.type = 'text/css';
         link.href = "../node_modules/monaco-editor/min/vs/editor/editor.main.css";
         document.getElementsByTagName('head')[0].appendChild(link);
-    }
-
-    // 创建编辑器
-    public create(container: HTMLElement) {
-
-        this._container = container
-
-        this.updateStyle()
-        this.loadMonacoStyle()
-        this.loadMonaco()
     }
 
     // 编辑器加载文件

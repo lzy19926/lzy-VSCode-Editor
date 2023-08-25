@@ -2,12 +2,12 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:00:02
+ * @LastEditTime: 2023-08-25 15:13:25
  * @Description: 顶部导航菜单栏
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { IEditorService } from './EditorPart'
+import { IEditorService } from './Editor'
 import { ISideBarService } from './SideBar'
 import { Part } from './Part'
 import API from '../api'
@@ -27,14 +27,14 @@ export class TitleBarPart implements ITitleBarService, Part {
 
         this.createOpenDirBtn()
         this.createOpenFileBtn()
-   
+
     }
 
     // 打开文件夹按钮
     createOpenDirBtn() {
         const btn = document.createElement("button")
         btn.innerText = "打开文件夹"
-        btn.onclick = this.event_loadFiletreeFromDir
+        btn.onclick = this.event_loadFiletreeFromDir.bind(this)
         this._container.appendChild(btn)
     }
 
