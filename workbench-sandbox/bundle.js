@@ -90,7 +90,7 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:07:25
+ * @LastEditTime: 2023-08-25 15:28:53
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
@@ -106,6 +106,7 @@ class EditorPart {
         this.updateStyle();
         this.loadMonacoStyle();
         this.loadMonaco();
+        this.reloadEditor();
     }
     // 更新容器样式
     updateStyle() {
@@ -134,6 +135,17 @@ class EditorPart {
         link.type = 'text/css';
         link.href = "../node_modules/monaco-editor/min/vs/editor/editor.main.css";
         document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    // 编辑器响应式布局重绘功能
+    reloadEditor() {
+        // 监听 Window 的 resize事件以触发菜单栏重绘、同时更新 Monaco Editor 的宽度与高度
+        window.addEventListener('resize', () => {
+            const height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) - this._container.offsetTop;
+            this._container.style.height = `${height}px`;
+            if (this._editor) {
+                this._editor.layout();
+            }
+        });
     }
     // 编辑器加载文件
     loadFileContent(text) {
@@ -518,7 +530,7 @@ exports.ITitleBarService = exports.TitleBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:00:02
+ * @LastEditTime: 2023-08-25 15:13:25
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(2);
@@ -543,7 +555,7 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     createOpenDirBtn() {
         const btn = document.createElement("button");
         btn.innerText = "打开文件夹";
-        btn.onclick = this.event_loadFiletreeFromDir;
+        btn.onclick = this.event_loadFiletreeFromDir.bind(this);
         this._container.appendChild(btn);
     }
     // 打开文件按钮

@@ -49,7 +49,11 @@ export class WindowApplicationService implements IWindowApplicationService {
             autoHideMenuBar: true,
         })
         this._id = this._win.id;
+
+        this._win.setMinimumSize(400, 50); // 窗口长宽最小值
     }
+
+
 
     // 加载窗口资源
     load() {

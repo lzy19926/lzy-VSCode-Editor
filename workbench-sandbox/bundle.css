@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 00:31:05
+ * @LastEditTime: 2023-08-25 15:39:36
  * @Description: 
  */
 
@@ -12,6 +12,7 @@
 body {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 .editor {
@@ -19,25 +20,27 @@ body {
     width: 85%;
     position: fixed;
     right: 0;
-    top: 5%;
+    top: 43px;
 }
 
 .sideBar {
     height: 100%;
     width: 15%;
     position: fixed;
-    left: 0;
-    top: 5%;
-    background-color: bisque;
+    left: -3px;
+    top: 43px;
+    background-color: rgb(206, 100, 7);
+    border-right: solid 3px #ccc;
 }
 
 .titleBar {
-    height: 5%;
+    height: 40px;
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
     background-color: brown;
+    border-bottom: solid 3px #ccc;
 }
 
 
