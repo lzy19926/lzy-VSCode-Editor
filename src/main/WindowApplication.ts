@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 00:12:09
+ * @LastEditTime: 2023-08-26 03:37:13
  * @Description: 主窗口模块 对应每个打开的窗口App
  */
 import { app, BrowserWindow } from 'electron';
@@ -47,6 +47,10 @@ export class WindowApplicationService implements IWindowApplicationService {
             height: 600,
             title: "Lzy_Editor",
             autoHideMenuBar: true,
+            webPreferences: {
+                nodeIntegration: true, //渲染进程可访问Node
+                preload: "E:\\VS_Code\\myVSCode\\out\\workbench\\api\\apiFactory.js" // 预加载的js脚本 将API注入window
+            }
         })
         this._id = this._win.id;
 

@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:59:48
+ * @LastEditTime: 2023-08-26 03:36:40
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const Editor_1 = __webpack_require__(1);
@@ -90,7 +90,7 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:51:10
+ * @LastEditTime: 2023-08-26 03:34:07
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
@@ -151,7 +151,15 @@ class EditorPart {
     loadFileModel(model) {
         this._editor.getModel().setValue(model.text);
         this._currentModel = model;
-        console.log(this._currentModel);
+        console.log("current model", this._currentModel);
+    }
+    // 获取当前文件对象
+    getCurrentModel() {
+        return this._currentModel;
+    }
+    // 获取当前文本
+    getCurrentText() {
+        return this._editor.getModel().getValue();
     }
 }
 exports.EditorPart = EditorPart;
@@ -214,7 +222,7 @@ exports.createDecorator = createDecorator;
  * @Author: Luzy
  * @Date: 2023-08-18 15:24:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:39:30
+ * @LastEditTime: 2023-08-26 01:06:48
  * @Description: 用于保存Service实例或描述器的集合
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -284,7 +292,7 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:47:42
+ * @LastEditTime: 2023-08-25 18:52:08
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
@@ -295,9 +303,11 @@ const treeView_1 = __webpack_require__(7);
 const api_1 = __importDefault(__webpack_require__(8));
 let SideBarPart = exports.SideBarPart = class SideBarPart {
     editorService;
+    textFileService;
     _container;
-    constructor(editorService) {
+    constructor(editorService, textFileService) {
         this.editorService = editorService;
+        this.textFileService = textFileService;
     }
     create(container) {
         this._container = container;
@@ -312,7 +322,7 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
     }
     //ul事件 渲染单个文件
     async event_loadFileContent(e, node) {
-        console.log(node);
+        console.log("--fileInfo--", node);
         const isDir = node.origin?.isDir;
         if (isDir)
             return;
@@ -320,13 +330,14 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         const res = await api_1.default.getFileContent(fileAbsolutePath);
         // 通过buffer创建文件Model并渲染
         const buffer = res.data.data;
-        const model = (0, textFileService_1.createFileModel)(fileAbsolutePath, buffer);
+        const model = this.textFileService.getFileModel(fileAbsolutePath, buffer);
         // 渲染到Editor上
         this.editorService.loadFileModel(model);
     }
 };
 exports.SideBarPart = SideBarPart = __decorate([
-    __param(0, Editor_1.IEditorService)
+    __param(0, Editor_1.IEditorService),
+    __param(1, textFileService_1.ITextFileService)
 ], SideBarPart);
 exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
@@ -341,8 +352,8 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:51:28
- * @Description: 提供前端文本对象相关功能
+ * @LastEditTime: 2023-08-25 23:13:39
+ * @Description: 提供前端文本模型相关功能
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -354,35 +365,71 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ITextFileService = exports.TextFileService = exports.createFileModel = void 0;
+exports.ITextFileService = exports.TextFileService = void 0;
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const cacheFileService_1 = __webpack_require__(6);
 const Editor_1 = __webpack_require__(1);
-// 创建文件对象
-function createFileModel(path, buffer) {
-    const binaryArray = new Uint8Array(buffer);
-    const fileContentString = new TextDecoder().decode(binaryArray);
-    return {
-        id: path,
-        buffer: binaryArray,
-        text: fileContentString
-    };
-}
-exports.createFileModel = createFileModel;
 let TextFileService = exports.TextFileService = class TextFileService {
     cacheFileService;
     editorService;
-    _currentModel; //当前编辑器中的文件对象
+    _currentModel; //当前编辑器中的文件模型
     constructor(cacheFileService, editorService) {
         this.cacheFileService = cacheFileService;
         this.editorService = editorService;
+        this.onSaveFile();
     }
     // 比较编辑器文本和原文件内容
-    // todo 使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
-    diffText_test(id) {
-        const originFile = this.cacheFileService.get(id);
-        // const currentModel = this.editorService.getCurrentFileModel()
+    // todo 需要优化为使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
+    // todo 可使用下列库进行操作
+    // JsDiff：一个用于Web浏览器和Node.js 的JavaScript差异算法。它支持字符、标记以及行对比。
+    // fast-jsdiff：JsDiff改进，并加入了Babylon diff补丁支持。
+    diffText_test() {
+        const currentText = this.editorService.getCurrentText();
+        const originModel = this.editorService.getCurrentModel();
+        if (originModel) {
+            const id = originModel.id;
+            if (originModel.text !== currentText) {
+                console.log(`File:[[${id}]]  Changed`);
+                this.cacheFileService.update(id, currentText);
+            }
+            else {
+                console.log(`File:[[${id}]]  NO Changed`);
+            }
+        }
+    }
+    // 获取文件模型
+    getFileModel(path, buffer) {
+        let model = this.cacheFileService.get(path);
+        if (!model) {
+            model = this._createFileModel(path, buffer);
+            this.cacheFileService.set(path, model);
+        }
+        return model;
+    }
+    // 创建文件模型
+    _createFileModel(path, buffer) {
+        const binaryArray = new Uint8Array(buffer);
+        const fileContentString = new TextDecoder().decode(binaryArray);
+        return {
+            id: path,
+            buffer: binaryArray,
+            text: fileContentString
+        };
+    }
+    //!-------------------监听ctrl+s键盘事件--------------------
+    //todo 使用mousetrap库进行改写
+    onSaveFile() {
+        const that = this;
+        document.addEventListener('keydown', function (event) {
+            // 按下 Ctrl 和 s 键
+            if (event.ctrlKey && event.keyCode === 83) {
+                // 防止浏览器默认行为 
+                event.preventDefault();
+                console.log('Ctrl+S was pressed');
+                that.diffText_test();
+            }
+        });
     }
 };
 exports.TextFileService = TextFileService = __decorate([
@@ -402,7 +449,7 @@ exports.ITextFileService = (0, decorator_1.createDecorator)("ITextFileService");
  * @Author: Luzy
  * @Date: 2023-08-25 16:56:06
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:21:32
+ * @LastEditTime: 2023-08-25 18:51:48
  * @Description: 提供文本文件前端缓存功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -416,6 +463,13 @@ class CacheFileService {
     }
     set(id, model) {
         this._cache.set(id, model);
+    }
+    update(id, text) {
+        const model = this._cache.get(id);
+        if (model) {
+            model.text = text;
+            console.log(`Update File:[[${id}]]  Succeed`);
+        }
     }
 }
 exports.CacheFileService = CacheFileService;
@@ -577,8 +631,8 @@ exports.TreeListView = TreeListView;
  * @Author: Luzy
  * @Date: 2023-08-25 14:35:42
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 16:29:16
- * @Description: 该文件夹定义所有渲染进程需要调用的API
+ * @LastEditTime: 2023-08-26 00:44:48
+ * @Description: 该文件夹定义所有渲染进程需要调用的网络API
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 /**
@@ -599,7 +653,6 @@ exports["default"] = {
     getFileTreeFromDir,
     getFileContent
 };
-// 保存文件的的的的
 
 
 /***/ }),
@@ -625,7 +678,7 @@ exports.ITitleBarService = exports.TitleBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:49:43
+ * @LastEditTime: 2023-08-26 03:55:41
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(2);
@@ -655,10 +708,12 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     }
     // 打开文件按钮
     createOpenFileBtn() {
-        const btn = document.createElement("input");
+        const btn = document.createElement("button");
         btn.innerText = "打开文件";
-        btn.type = "file";
-        btn.onchange = this.event_loadFileContent.bind(this);
+        // btn.onchange = this.event_loadFileContent.bind(this)
+        btn.onclick = () => {
+            console.log(window.LZY_API.readFileTextSync("1"));
+        };
         this._container.appendChild(btn);
     }
     // 按钮事件 获取并加载文件树
@@ -702,7 +757,7 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
  * @Author: Luzy
  * @Date: 2023-08-20 15:32:08
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 23:51:39
+ * @LastEditTime: 2023-08-26 01:00:39
  * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
