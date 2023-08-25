@@ -2,12 +2,12 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:47:42
+ * @LastEditTime: 2023-08-25 18:01:38
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { createFileModel } from '../services/textFileService'
+import { ITextFileService } from '../services/textFileService'
 import { IEditorService } from './Editor'
 import { TreeListView } from '../dom/treeView'
 import { Part } from './Part'
@@ -18,7 +18,8 @@ export class SideBarPart implements ISideBarService, Part {
     private _container!: HTMLElement
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService
+        @IEditorService private readonly editorService: IEditorService,
+        @ITextFileService private readonly textFileService: ITextFileService
     ) {
 
     }
@@ -50,7 +51,7 @@ export class SideBarPart implements ISideBarService, Part {
 
         // 通过buffer创建文件Model并渲染
         const buffer = res.data.data;
-        const model = createFileModel(fileAbsolutePath, buffer)
+        const model = this.textFileService.getFileModel(fileAbsolutePath, buffer)
 
         // 渲染到Editor上
         this.editorService.loadFileModel(model)
