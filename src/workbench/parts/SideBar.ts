@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 18:01:38
+ * @LastEditTime: 2023-08-25 18:52:08
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -41,7 +41,7 @@ export class SideBarPart implements ISideBarService, Part {
 
     //ul事件 渲染单个文件
     async event_loadFileContent(e: MouseEvent, node: any) {
-        console.log(node);
+        console.log("--fileInfo--", node);
 
         const isDir = node.origin?.isDir
         if (isDir) return
@@ -52,7 +52,6 @@ export class SideBarPart implements ISideBarService, Part {
         // 通过buffer创建文件Model并渲染
         const buffer = res.data.data;
         const model = this.textFileService.getFileModel(fileAbsolutePath, buffer)
-
         // 渲染到Editor上
         this.editorService.loadFileModel(model)
     }

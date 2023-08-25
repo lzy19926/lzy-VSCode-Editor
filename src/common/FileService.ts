@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 12:11:40
+ * @LastEditTime: 2023-08-25 18:43:15
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -25,7 +25,7 @@ export class FileService {
     constructor() { }
 
     public getFileBuffer(absolutePath: string): Buffer {
-        return fs.readFileSync(absolutePath)
+        return fs.readFileSync(decodeURIComponent(absolutePath))
     }
 
     testOpenFile() {

@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:56:06
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 17:21:32
+ * @LastEditTime: 2023-08-25 18:51:48
  * @Description: 提供文本文件前端缓存功能
  */
 
@@ -22,11 +22,21 @@ export class CacheFileService {
         this._cache.set(id, model)
     }
 
+    update(id: string, text: string) {
+        const model = this._cache.get(id)
+
+        if (model) {
+            model.text = text
+            console.log(`Update File:[[${id}]]  Succeed`);
+        }
+
+    }
 }
 
 export interface ICacheFileService {
     get(id: string): TextFileModel | undefined
     set(id: string, model: TextFileModel): void
+    update(id: string, text: string): void
 }
 
 export const ICacheFileService = createDecorator<ICacheFileService>("ICacheFileService")
