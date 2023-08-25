@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-18 15:24:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 11:39:30
+ * @LastEditTime: 2023-08-26 01:06:48
  * @Description: 用于保存Service实例或描述器的集合
  */
 
@@ -26,7 +26,7 @@ export class ServiceCollection {
         this._entries.set(id, descOrInstance);
     }
 
-    get<T>(id: ServiceIdentifier<T>): SyncDescriptor<T> {
+    get<T>(id: ServiceIdentifier<T>): SyncDescriptor<T> | T {
         return this._entries.get(id);
     }
 

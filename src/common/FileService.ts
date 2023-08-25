@@ -13,7 +13,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // 文件树类型
-type FileTreeNode = {
+export type FileTreeNode = {
     isDir: boolean;
     name: string;
     absolutePath: string;
