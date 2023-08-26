@@ -2,16 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 16:13:26
+ * @LastEditTime: 2023-08-26 16:39:06
  * @Description: 运行在主进程中的IPC通信模块  用于接收子进程的服务请求  或者转发子进程消息给其他子进程
  */
-
+import { ipcMain } from "electron"
 import { createDecorator } from './IOC/decorator'
 import { registerSingleton } from './IOC/serviceCollection'
-import { ipcMain } from 'electron'
 
 export class IPCMainService {
-
 
     constructor() {
         this.listen()
@@ -20,6 +18,8 @@ export class IPCMainService {
     listen() {
         this.listenAPI()
         this.listenProxy()
+        
+        console.log("[[IPC Main started]]")
     }
 
     // 处理API调用请求

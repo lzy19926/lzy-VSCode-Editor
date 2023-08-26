@@ -9,10 +9,7 @@
 
 import { IFileService } from "../../common/FileService"
 import type { FileTreeNode } from "../../common/FileService"
-import { contextBridge } from "electron";
 import { accessor } from './ServiceAccessor'
-import { ipcRenderer, ipcMain } from "electron"
-
 interface LZY_API {
     readFileTextSync(path: string): Buffer
     getFileTreeFromDir(): Promise<FileTreeNode | undefined>
@@ -33,12 +30,4 @@ function apiFactory(): LZY_API {
 }
 
 
-// 创建API   并将IPC模块注入到UI中  让其可调用API
-declare global {
-    interface Window {
-        IPC: Electron.IpcRenderer;
-    }
-}
 
-contextBridge.exposeInMainWorld("IPC", ipcRenderer)
-console.log('Inject ipcRenderer SUCCESS');

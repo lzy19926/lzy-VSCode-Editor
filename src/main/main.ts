@@ -11,12 +11,14 @@ import { app } from 'electron';
 import { getGlobalCollection, SyncDescriptor } from '../common/IOC/serviceCollection'
 import { InstantiationService, IInstantiationService } from '../common/IOC/InstantiationService'
 import { WindowApplicationService, IWindowApplicationService } from './WindowApplication';
-import type { ServiceCollection } from '../common/IOC/serviceCollection'
 import { INlsService } from '../common/NlsService';
 import { IFileService } from '../common/FileService';
 import { IPerformanceService } from '../common/PerformanceService';
 import { IWindowService } from '../common/WindowService';
 import { IProtocolService } from '../common/ProtocolService'
+import { IIPCMainService } from '../common/IPCMainService';
+
+import type { ServiceCollection } from '../common/IOC/serviceCollection'
 class CodeMain {
 
     // 入口启动函数
@@ -63,6 +65,9 @@ class CodeMain {
         const protocolService = instantiationService.createInstance(services.get(IProtocolService))
         services.set(IProtocolService, protocolService)
 
+        const ipcMainService = instantiationService.createInstance(services.get(IIPCMainService))
+        services.set(IIPCMainService, ipcMainService)
+        
         return [services, instantiationService]
     }
 

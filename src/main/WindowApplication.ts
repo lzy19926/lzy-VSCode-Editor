@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 03:37:13
+ * @LastEditTime: 2023-08-26 16:37:46
  * @Description: 主窗口模块 对应每个打开的窗口App
  */
 import { app, BrowserWindow } from 'electron';
@@ -49,7 +49,7 @@ export class WindowApplicationService implements IWindowApplicationService {
             autoHideMenuBar: true,
             webPreferences: {
                 nodeIntegration: true, //渲染进程可访问Node
-                preload: "E:\\VS_Code\\myVSCode\\out\\workbench\\api\\apiFactory.js" // 预加载的js脚本 将API注入window
+                preload: "E:\\VS_Code\\myVSCode\\out\\common\\ContextBridge.js" // 预加载的js脚本 将所需属性注入window
             }
         })
         this._id = this._win.id;
