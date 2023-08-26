@@ -2,16 +2,16 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 18:52:08
+ * @LastEditTime: 2023-08-26 18:12:02
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ITextFileService } from '../services/textFileService'
 import { IEditorService } from './Editor'
+import { IIPCRendererService } from '../services/IPCRendererService'
 import { TreeListView } from '../dom/treeView'
 import { Part } from './Part'
-import API from '../api'
 
 export class SideBarPart implements ISideBarService, Part {
 
@@ -19,7 +19,8 @@ export class SideBarPart implements ISideBarService, Part {
 
     constructor(
         @IEditorService private readonly editorService: IEditorService,
-        @ITextFileService private readonly textFileService: ITextFileService
+        @ITextFileService private readonly textFileService: ITextFileService,
+        @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
 
     }
@@ -47,12 +48,10 @@ export class SideBarPart implements ISideBarService, Part {
         if (isDir) return
 
         const fileAbsolutePath = node.origin?.absolutePath
-        const res = await API.getFileContent(fileAbsolutePath)
+        const fileText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path: fileAbsolutePath })
 
-        // 通过buffer创建文件Model并渲染
-        const buffer = res.data.data;
-        const model = this.textFileService.getFileModel(fileAbsolutePath, buffer)
-        // 渲染到Editor上
+        // 文件Model并渲染
+        const model = this.textFileService.getFileModel(fileAbsolutePath, fileText)
         this.editorService.loadFileModel(model)
     }
 }
