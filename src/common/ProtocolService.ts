@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 12:11:26
+ * @LastEditTime: 2023-08-26 15:08:57
  * @Description: 提供内置协议管理的服务  浏览器-Node进程通信使用该协议
  */
 import { protocol, app } from 'electron';
@@ -145,7 +145,7 @@ class Controller {
         console.log(params);
         const path = params.path
         const fileService = getFileService()
-        const fileBuffer = fileService.getFileBuffer(path)
+        const fileBuffer = fileService.readFileBuffer(path)
 
         const response = {
             statusCode: 200,
