@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 17:49:22
+ * @LastEditTime: 2023-08-26 18:57:24
  * @Description: 顶部导航菜单栏
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -58,6 +58,21 @@ export class TitleBarPart implements ITitleBarService, Part {
     //todo 需要重写 按钮事件 加载单个文件
     async event_loadFileContent(event: Event) {
         alert("此功能暂不开放")
+
+        // /**@ts-ignore*/
+        // const file = event.target?.files?.[0]
+        // const editor = this.editorService
+
+        // if (file) {
+        //     const reader = new FileReader();
+        //     reader.onload = () => {
+        //         const text = reader.result;
+        //         if (typeof text == 'string') {
+        //             // editor.loadFileContent(text)
+        //         }
+        //     };
+        //     reader.readAsText(file);
+        // }
     }
 }
 

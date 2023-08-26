@@ -20,14 +20,15 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-22 18:59:48
+ * @LastEditTime: 2023-08-26 18:58:58
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
 const TitleBar_1 = __webpack_require__(9);
+const BroswerEventsService_1 = __webpack_require__(10);
 const serviceCollection_1 = __webpack_require__(3);
-const InstantiationService_1 = __webpack_require__(10);
+const InstantiationService_1 = __webpack_require__(11);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -36,7 +37,7 @@ var Parts;
 })(Parts || (exports.Parts = Parts = {}));
 let Workbench = exports.Workbench = class Workbench {
     parts = new Map();
-    constructor(editorService, titleBarService, sideBarService) {
+    constructor(editorService, titleBarService, sideBarService, broswerEventsService) {
         this.parts.set(Parts.EDITOR_PART, editorService);
         this.parts.set(Parts.SIDEBAR_PART, sideBarService);
         this.parts.set(Parts.TITLEBAR_PART, titleBarService);
@@ -66,7 +67,8 @@ let Workbench = exports.Workbench = class Workbench {
 exports.Workbench = Workbench = __decorate([
     __param(0, Editor_1.IEditorService),
     __param(1, TitleBar_1.ITitleBarService),
-    __param(2, SideBar_1.ISideBarService)
+    __param(2, SideBar_1.ISideBarService),
+    __param(3, BroswerEventsService_1.IBroswerEventsService)
 ], Workbench);
 // 创建运行workbench
 function main() {
@@ -670,7 +672,7 @@ exports.ITitleBarService = exports.TitleBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 17:49:22
+ * @LastEditTime: 2023-08-26 18:57:24
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(2);
@@ -716,6 +718,19 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     //todo 需要重写 按钮事件 加载单个文件
     async event_loadFileContent(event) {
         alert("此功能暂不开放");
+        // /**@ts-ignore*/
+        // const file = event.target?.files?.[0]
+        // const editor = this.editorService
+        // if (file) {
+        //     const reader = new FileReader();
+        //     reader.onload = () => {
+        //         const text = reader.result;
+        //         if (typeof text == 'string') {
+        //             // editor.loadFileContent(text)
+        //         }
+        //     };
+        //     reader.readAsText(file);
+        // }
     }
 };
 exports.TitleBarPart = TitleBarPart = __decorate([
@@ -729,6 +744,60 @@ exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 
 /***/ }),
 /* 10 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IBroswerEventsService = exports.BroswerEventsService = void 0;
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-22 11:36:46
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-26 18:52:15
+ * @Description: 用于统一管理浏览器鼠标,键盘等事件的模块
+ */
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+const TextFileService_1 = __webpack_require__(5);
+let BroswerEventsService = exports.BroswerEventsService = class BroswerEventsService {
+    textFileService;
+    constructor(textFileService) {
+        this.textFileService = textFileService;
+        this.onSaveFile();
+    }
+    //todo 使用mousetrap库进行改写
+    //-------------------监听ctrl+s键盘事件--------------------
+    onSaveFile() {
+        const that = this;
+        document.addEventListener('keydown', function (event) {
+            // 按下 Ctrl 和 s 键
+            if (event.ctrlKey && event.keyCode === 83) {
+                // 防止浏览器默认行为 
+                event.preventDefault();
+                console.log('Ctrl+S was pressed');
+                that.textFileService.diffCurrentFileModel();
+            }
+        });
+    }
+};
+exports.BroswerEventsService = BroswerEventsService = __decorate([
+    __param(0, TextFileService_1.ITextFileService)
+], BroswerEventsService);
+exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEventsService");
+(0, serviceCollection_1.registerSingleton)(exports.IBroswerEventsService, BroswerEventsService);
+
+
+/***/ }),
+/* 11 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 

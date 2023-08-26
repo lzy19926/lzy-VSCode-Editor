@@ -12,15 +12,11 @@ import { ITextFileService } from './TextFileService'
 
 export class BroswerEventsService {
 
-
     constructor(
         @ITextFileService private readonly textFileService: ITextFileService,
     ) {
         this.onSaveFile()
     }
-
-
-
 
     //todo 使用mousetrap库进行改写
     //-------------------监听ctrl+s键盘事件--------------------
@@ -37,7 +33,6 @@ export class BroswerEventsService {
             }
         });
     }
-
 
 }
 
