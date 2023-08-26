@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 17:47:00
+ * @LastEditTime: 2023-08-26 18:22:22
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -32,6 +32,9 @@ export class FileService {
     }
     public readFileText(path: string, charset: BufferEncoding = "utf-8"): string {
         return fs.readFileSync(decodeURIComponent(path)).toString(charset)
+    }
+    public writeFileText(path: string, text: string): void {
+        return fs.writeFileSync(decodeURIComponent(path), text)
     }
 
     // 打开对话框 获取文件夹内文件树
@@ -90,8 +93,8 @@ export class FileService {
 export interface IFileService {
     readFileBuffer(path: string): Buffer
     readFileText(path: string, charset?: BufferEncoding): string
+    writeFileText(path: string, text: string): void
     getFileTreeFromDir(): Promise<FileTreeNode | undefined>
-
 }
 
 export const IFileService = createDecorator<IFileService>("IFileService")

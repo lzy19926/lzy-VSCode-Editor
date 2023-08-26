@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 17:55:27
+ * @LastEditTime: 2023-08-26 18:28:37
  * @Description: 运行在主进程中的IPC通信模块  用于接收子进程的服务请求  或者转发子进程消息给其他子进程
  */
 import { ipcMain } from "electron"
@@ -39,6 +39,8 @@ export class IPCMainService {
                 case "readFileTextSync": res = API.readFileTextSync(params.path)
                     break;
                 case "readFileBufferSync": res = API.readFileBufferSync(params.path)
+                    break;
+                case "writeFileTextSync": res = API.writeFileTextSync(params.path, params.text)
                     break;
                 case "getFileTreeFromDir": res = API.getFileTreeFromDir()
                     break;
