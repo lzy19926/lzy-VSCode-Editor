@@ -90,7 +90,7 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 18:30:34
+ * @LastEditTime: 2023-08-26 18:41:27
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
@@ -151,7 +151,7 @@ class EditorPart {
     loadFileModel(model) {
         this._editor.getModel().setValue(model.text);
         this._currentModel = model;
-        console.log("current model", this._currentModel);
+        console.log("loadFile model", this._currentModel);
     }
     // 获取当前文件对象
     getCurrentModel() {
@@ -289,7 +289,7 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:12:02
+ * @LastEditTime: 2023-08-26 18:42:46
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
@@ -325,10 +325,11 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         const isDir = node.origin?.isDir;
         if (isDir)
             return;
+        // todo 使用缓存
         const fileAbsolutePath = node.origin?.absolutePath;
         const fileText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path: fileAbsolutePath });
-        // 文件Model并渲染
         const model = this.textFileService.getFileModel(fileAbsolutePath, fileText);
+        // 渲染文件Model
         this.editorService.loadFileModel(model);
     }
 };
@@ -350,8 +351,8 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:08:48
- * @Description: 提供前端文本模型相关功能
+ * @LastEditTime: 2023-08-26 18:32:14
+ * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -368,13 +369,16 @@ const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const cacheFileService_1 = __webpack_require__(6);
 const Editor_1 = __webpack_require__(1);
+const IPCRendererService_1 = __webpack_require__(7);
 let TextFileService = exports.TextFileService = class TextFileService {
     cacheFileService;
     editorService;
+    ipcRendererService;
     _currentModel; //当前编辑器中的文件模型
-    constructor(cacheFileService, editorService) {
+    constructor(cacheFileService, editorService, ipcRendererService) {
         this.cacheFileService = cacheFileService;
         this.editorService = editorService;
+        this.ipcRendererService = ipcRendererService;
         this.onSaveFile();
     }
     // 比较编辑器文本和原文件内容
@@ -389,6 +393,7 @@ let TextFileService = exports.TextFileService = class TextFileService {
             const id = originModel.id;
             if (originModel.text !== currentText) {
                 console.log(`File:[[${id}]]  Changed`);
+                this.updateDiskFile(id, currentText);
                 this.cacheFileService.update(id, currentText);
             }
             else {
@@ -417,6 +422,11 @@ let TextFileService = exports.TextFileService = class TextFileService {
         }
         return { id, text, buffer };
     }
+    // 通知文件进程写回文件内容到硬盘
+    updateDiskFile(path, content) {
+        this.ipcRendererService.invokeAPI("writeFileTextSync", { path, text: content });
+        console.log(`Update File:[[${path}]] in Disk Succeed`);
+    }
     //!-------------------监听ctrl+s键盘事件--------------------
     //todo 使用mousetrap库进行改写
     onSaveFile() {
@@ -434,7 +444,8 @@ let TextFileService = exports.TextFileService = class TextFileService {
 };
 exports.TextFileService = TextFileService = __decorate([
     __param(0, cacheFileService_1.ICacheFileService),
-    __param(1, Editor_1.IEditorService)
+    __param(1, Editor_1.IEditorService),
+    __param(2, IPCRendererService_1.IIPCRendererService)
 ], TextFileService);
 exports.ITextFileService = (0, decorator_1.createDecorator)("ITextFileService");
 (0, serviceCollection_1.registerSingleton)(exports.ITextFileService, TextFileService);
@@ -468,7 +479,7 @@ class CacheFileService {
         const model = this._cache.get(id);
         if (model) {
             model.text = text;
-            console.log(`Update File:[[${id}]]  Succeed`);
+            console.log(`Update File:[[${id}]] in Cache Succeed`);
         }
     }
 }

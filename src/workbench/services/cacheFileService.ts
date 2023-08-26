@@ -27,7 +27,7 @@ export class CacheFileService {
 
         if (model) {
             model.text = text
-            console.log(`Update File:[[${id}]]  Succeed`);
+            console.log(`Update File:[[${id}]] in Cache Succeed`);
         }
 
     }

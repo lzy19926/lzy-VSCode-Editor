@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:12:02
+ * @LastEditTime: 2023-08-26 18:42:46
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -47,11 +47,12 @@ export class SideBarPart implements ISideBarService, Part {
         const isDir = node.origin?.isDir
         if (isDir) return
 
+        // todo 使用缓存
         const fileAbsolutePath = node.origin?.absolutePath
         const fileText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path: fileAbsolutePath })
-
-        // 文件Model并渲染
         const model = this.textFileService.getFileModel(fileAbsolutePath, fileText)
+
+        // 渲染文件Model
         this.editorService.loadFileModel(model)
     }
 }

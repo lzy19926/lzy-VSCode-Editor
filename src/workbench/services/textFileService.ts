@@ -2,15 +2,15 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:08:48
- * @Description: 提供前端文本模型相关功能
+ * @LastEditTime: 2023-08-26 18:32:14
+ * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ICacheFileService } from './cacheFileService'
 import { IEditorService } from '../parts/Editor'
-
+import { IIPCRendererService } from './IPCRendererService'
 // 单个文本文件模型
 export type TextFileModel = {
     id: string
@@ -25,6 +25,7 @@ export class TextFileService {
     constructor(
         @ICacheFileService private readonly cacheFileService: ICacheFileService,
         @IEditorService private readonly editorService: IEditorService,
+        @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
         this.onSaveFile()
     }
@@ -44,6 +45,8 @@ export class TextFileService {
 
             if (originModel.text !== currentText) {
                 console.log(`File:[[${id}]]  Changed`);
+
+                this.updateDiskFile(id, currentText)
                 this.cacheFileService.update(id, currentText)
             } else {
                 console.log(`File:[[${id}]]  NO Changed`);
@@ -80,8 +83,12 @@ export class TextFileService {
     }
 
 
+    // 通知文件进程写回文件内容到硬盘
+    private updateDiskFile(path: string, content: string) {
+        this.ipcRendererService.invokeAPI("writeFileTextSync", { path, text: content })
+        console.log(`Update File:[[${path}]] in Disk Succeed`);
 
-
+    }
 
 
     //!-------------------监听ctrl+s键盘事件--------------------
