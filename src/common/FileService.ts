@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 18:43:15
+ * @LastEditTime: 2023-08-26 15:07:21
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -24,22 +24,11 @@ export type FileTreeNode = {
 export class FileService {
     constructor() { }
 
-    public getFileBuffer(absolutePath: string): Buffer {
-        return fs.readFileSync(decodeURIComponent(absolutePath))
+    public readFileBuffer(path: string): Buffer {
+        return fs.readFileSync(decodeURIComponent(path))
     }
-
-    testOpenFile() {
-        dialog.showOpenDialog({
-            properties: ['openFile']
-        }).then(result => {
-            // result.canceled 表示用户是否点了 "取消" 按钮
-            if (!result.canceled) {
-                const filePaths = result.filePaths; // 返回一个数组，包含选中的所有文件的路径
-                console.log(filePaths);
-            }
-        }).catch(err => {
-            console.log(err);
-        });
+    public readFileText(path: string, charset: BufferEncoding = "utf-8"): string {
+        return fs.readFileSync(decodeURIComponent(path)).toString(charset)
     }
 
     // 打开对话框 获取文件夹内文件树
@@ -97,7 +86,8 @@ export class FileService {
 }
 
 export interface IFileService {
-    getFileBuffer(absolutePath: string): Buffer,
+    readFileBuffer(path: string): Buffer
+    readFileText(path: string, charset: BufferEncoding): string
     getFileTreeFromDir(): Promise<FileTreeNode | undefined>
 
 }
