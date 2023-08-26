@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 15:07:21
+ * @LastEditTime: 2023-08-26 17:47:00
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -22,7 +22,10 @@ export type FileTreeNode = {
 };
 
 export class FileService {
-    constructor() { }
+    dialog: Electron.Dialog
+    constructor() {
+        this.dialog = dialog
+    }
 
     public readFileBuffer(path: string): Buffer {
         return fs.readFileSync(decodeURIComponent(path))
@@ -34,8 +37,7 @@ export class FileService {
     // 打开对话框 获取文件夹内文件树
     // 渲染进程无法获取系统数据  故在主进程中获取  并于渲染进程通信
     public async getFileTreeFromDir(): Promise<FileTreeNode | undefined> {
-        const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
-
+        const result = await this.dialog.showOpenDialog({ properties: ['openDirectory'] })
         return !result.canceled
             ? this.parseFileTree(result.filePaths[0])
             : undefined
@@ -87,7 +89,7 @@ export class FileService {
 
 export interface IFileService {
     readFileBuffer(path: string): Buffer
-    readFileText(path: string, charset: BufferEncoding): string
+    readFileText(path: string, charset?: BufferEncoding): string
     getFileTreeFromDir(): Promise<FileTreeNode | undefined>
 
 }
