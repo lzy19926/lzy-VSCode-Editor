@@ -7,7 +7,7 @@
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { ITextFileService } from '../services/textFileService'
+import { ITextFileService } from '../services/TextFileService'
 import { IEditorService } from './Editor'
 import { IIPCRendererService } from '../services/IPCRendererService'
 import { TreeListView } from '../dom/treeView'

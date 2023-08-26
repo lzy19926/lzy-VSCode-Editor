@@ -8,7 +8,7 @@
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { Part } from './Part'
-import type { TextFileModel } from '../services/textFileService'
+import type { TextFileModel } from '../services/TextFileService'
 
 
 export class EditorPart implements IEditorService, Part {
