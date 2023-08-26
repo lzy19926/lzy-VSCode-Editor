@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 03:36:40
+ * @LastEditTime: 2023-08-22 18:59:48
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const Editor_1 = __webpack_require__(1);
@@ -90,7 +90,7 @@ exports.IEditorService = exports.EditorPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 03:34:07
+ * @LastEditTime: 2023-08-25 18:30:34
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 const decorator_1 = __webpack_require__(2);
@@ -283,31 +283,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ISideBarService = exports.SideBarPart = void 0;
 /*
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 18:52:08
+ * @LastEditTime: 2023-08-26 18:12:02
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const textFileService_1 = __webpack_require__(5);
 const Editor_1 = __webpack_require__(1);
-const treeView_1 = __webpack_require__(7);
-const api_1 = __importDefault(__webpack_require__(8));
+const IPCRendererService_1 = __webpack_require__(7);
+const treeView_1 = __webpack_require__(8);
 let SideBarPart = exports.SideBarPart = class SideBarPart {
     editorService;
     textFileService;
+    ipcRendererService;
     _container;
-    constructor(editorService, textFileService) {
+    constructor(editorService, textFileService, ipcRendererService) {
         this.editorService = editorService;
         this.textFileService = textFileService;
+        this.ipcRendererService = ipcRendererService;
     }
     create(container) {
         this._container = container;
@@ -327,17 +326,16 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         if (isDir)
             return;
         const fileAbsolutePath = node.origin?.absolutePath;
-        const res = await api_1.default.getFileContent(fileAbsolutePath);
-        // 通过buffer创建文件Model并渲染
-        const buffer = res.data.data;
-        const model = this.textFileService.getFileModel(fileAbsolutePath, buffer);
-        // 渲染到Editor上
+        const fileText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path: fileAbsolutePath });
+        // 文件Model并渲染
+        const model = this.textFileService.getFileModel(fileAbsolutePath, fileText);
         this.editorService.loadFileModel(model);
     }
 };
 exports.SideBarPart = SideBarPart = __decorate([
     __param(0, Editor_1.IEditorService),
-    __param(1, textFileService_1.ITextFileService)
+    __param(1, textFileService_1.ITextFileService),
+    __param(2, IPCRendererService_1.IIPCRendererService)
 ], SideBarPart);
 exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ISideBarService, SideBarPart);
@@ -352,7 +350,7 @@ exports.ISideBarService = (0, decorator_1.createDecorator)("ISideBarService");
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 23:13:39
+ * @LastEditTime: 2023-08-26 18:08:48
  * @Description: 提供前端文本模型相关功能
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -399,23 +397,25 @@ let TextFileService = exports.TextFileService = class TextFileService {
         }
     }
     // 获取文件模型
-    getFileModel(path, buffer) {
+    getFileModel(path, bufferOrText) {
         let model = this.cacheFileService.get(path);
         if (!model) {
-            model = this._createFileModel(path, buffer);
+            model = this._createFileModel(path, bufferOrText);
             this.cacheFileService.set(path, model);
         }
         return model;
     }
-    // 创建文件模型
-    _createFileModel(path, buffer) {
-        const binaryArray = new Uint8Array(buffer);
-        const fileContentString = new TextDecoder().decode(binaryArray);
-        return {
-            id: path,
-            buffer: binaryArray,
-            text: fileContentString
-        };
+    // 创建文件模型(创建文件的Uint8Array和text)
+    _createFileModel(id, bufferOrText) {
+        let text, buffer;
+        if (typeof bufferOrText == 'string') {
+            text = bufferOrText;
+        }
+        else {
+            buffer = new Uint8Array(bufferOrText);
+            text = new TextDecoder().decode(buffer);
+        }
+        return { id, text, buffer };
     }
     //!-------------------监听ctrl+s键盘事件--------------------
     //todo 使用mousetrap库进行改写
@@ -479,6 +479,38 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
 
 /***/ }),
 /* 7 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IIPCRendererService = exports.IPCRendererService = void 0;
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-22 11:36:46
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-26 17:44:53
+ * @Description: 运行在渲染进程中的IPC通信模块 负责与主进程通信
+ */
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+class IPCRendererService {
+    IPC;
+    constructor() {
+        this.IPC = window.IPC;
+    }
+    // 此API类似于网络请求的fetch
+    // https://www.electronjs.org/zh/docs/latest/api/ipc-renderer#ipcrendererinvokechannel-args
+    invokeAPI(api, params) {
+        return this.IPC.invoke("API", { api, params });
+    }
+}
+exports.IPCRendererService = IPCRendererService;
+exports.IIPCRendererService = (0, decorator_1.createDecorator)("IIPCRendererService");
+(0, serviceCollection_1.registerSingleton)(exports.IIPCRendererService, IPCRendererService);
+
+
+/***/ }),
+/* 8 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -623,39 +655,6 @@ exports.TreeListView = TreeListView;
 
 
 /***/ }),
-/* 8 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-/*
- * @Author: Luzy
- * @Date: 2023-08-25 14:35:42
- * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 00:44:48
- * @Description: 该文件夹定义所有渲染进程需要调用的网络API
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-/**
- * @description: 打开文件夹对话框
-*/
-async function getFileTreeFromDir() {
-    return fetch('lzy://api/getFiles')
-        .then(response => response.json());
-}
-/**
- * @description: 获取单个文件内容
-*/
-async function getFileContent(path) {
-    return fetch(`lzy://api/getFileContent?path=${path}`)
-        .then(response => response.json());
-}
-exports["default"] = {
-    getFileTreeFromDir,
-    getFileContent
-};
-
-
-/***/ }),
 /* 9 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -669,30 +668,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ITitleBarService = exports.TitleBarPart = void 0;
 /*
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 03:55:41
+ * @LastEditTime: 2023-08-26 17:49:22
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
 const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
-const api_1 = __importDefault(__webpack_require__(8));
+const IPCRendererService_1 = __webpack_require__(7);
 let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     editorService;
     sideBarService;
+    ipcRendererService;
     _container;
-    constructor(editorService, sideBarService) {
+    constructor(editorService, sideBarService, ipcRendererService) {
         this.editorService = editorService;
         this.sideBarService = sideBarService;
+        this.ipcRendererService = ipcRendererService;
     }
     create(container) {
         this._container = container;
@@ -710,39 +708,24 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     createOpenFileBtn() {
         const btn = document.createElement("button");
         btn.innerText = "打开文件";
-        // btn.onchange = this.event_loadFileContent.bind(this)
-        btn.onclick = () => {
-            console.log(window.LZY_API.readFileTextSync("1"));
-        };
+        btn.onclick = this.event_loadFileContent.bind(this);
         this._container.appendChild(btn);
     }
     // 按钮事件 获取并加载文件树
     async event_loadFiletreeFromDir(event) {
-        const res = await api_1.default.getFileTreeFromDir();
-        const fileTree = res.data;
+        const res = await this.ipcRendererService.invokeAPI("getFileTreeFromDir");
+        const fileTree = res;
         this.sideBarService.renderFileList(fileTree);
     }
     //todo 需要重写 按钮事件 加载单个文件
-    event_loadFileContent(event) {
-        alert("该功能暂不可用");
-        // /**@ts-ignore*/
-        // const file = event.target?.files?.[0]
-        // const editor = this.editorService
-        // if (file) {
-        //     const reader = new FileReader();
-        //     reader.onload = () => {
-        //         const text = reader.result;
-        //         if (typeof text == 'string') {
-        //             // editor.loadFileContent(text)
-        //         }
-        //     };
-        //     reader.readAsText(file);
-        // }
+    async event_loadFileContent(event) {
+        alert("此功能暂不开放");
     }
 };
 exports.TitleBarPart = TitleBarPart = __decorate([
     __param(0, Editor_1.IEditorService),
-    __param(1, SideBar_1.ISideBarService)
+    __param(1, SideBar_1.ISideBarService),
+    __param(2, IPCRendererService_1.IIPCRendererService)
 ], TitleBarPart);
 exports.ITitleBarService = (0, decorator_1.createDecorator)("ITitleBarService");
 (0, serviceCollection_1.registerSingleton)(exports.ITitleBarService, TitleBarPart);

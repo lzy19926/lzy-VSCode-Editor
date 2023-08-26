@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 23:13:39
+ * @LastEditTime: 2023-08-26 18:08:48
  * @Description: 提供前端文本模型相关功能
  */
 
@@ -14,8 +14,8 @@ import { IEditorService } from '../parts/Editor'
 // 单个文本文件模型
 export type TextFileModel = {
     id: string
-    buffer: Uint8Array
     text: string
+    buffer: Uint8Array | undefined
 }
 
 
@@ -54,27 +54,29 @@ export class TextFileService {
     }
 
     // 获取文件模型
-    public getFileModel(path: string, buffer: Buffer): TextFileModel {
+    public getFileModel(path: string, bufferOrText: Buffer | string): TextFileModel {
         let model = this.cacheFileService.get(path)
 
         if (!model) {
-            model = this._createFileModel(path, buffer)
+            model = this._createFileModel(path, bufferOrText)
             this.cacheFileService.set(path, model)
         }
 
         return model
     }
 
-    // 创建文件模型
-    private _createFileModel(path: string, buffer: Buffer) {
-        const binaryArray = new Uint8Array(buffer)
-        const fileContentString = new TextDecoder().decode(binaryArray);
+    // 创建文件模型(创建文件的Uint8Array和text)
+    private _createFileModel(id: string, bufferOrText: Buffer | string): TextFileModel {
+        let text, buffer
 
-        return {
-            id: path,
-            buffer: binaryArray,
-            text: fileContentString
+        if (typeof bufferOrText == 'string') {
+            text = bufferOrText
+        } else {
+            buffer = new Uint8Array(bufferOrText)
+            text = new TextDecoder().decode(buffer);
         }
+
+        return { id, text, buffer }
     }
 
 
@@ -103,7 +105,7 @@ export class TextFileService {
 }
 
 export interface ITextFileService {
-    getFileModel(path: string, buffer: Buffer): TextFileModel
+    getFileModel(path: string, bufferOrText: Buffer | string): TextFileModel
 }
 
 export const ITextFileService = createDecorator<ITextFileService>("ITextFileService")
