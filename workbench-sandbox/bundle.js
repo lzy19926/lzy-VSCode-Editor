@@ -521,7 +521,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 14:28:02
+ * @LastEditTime: 2023-08-28 17:22:20
  * @Description: 树状列表组件 用于文件展示等功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -574,21 +574,24 @@ class TreeListView {
     // 收起或者展开树形列表项。如果点击区域在子列表上则不切换收起状态。
     toggleExpandStatus(event) {
         const { currentNode, nodeElement } = this.getTriggerEventNode(event);
-        if (!currentNode)
+        if (!currentNode || !nodeElement)
             return;
         currentNode.expanded = !currentNode.expanded;
+        const node__content = nodeElement.querySelector(".node__content");
         const node__children = nodeElement.querySelector(".node__children");
         const expand_icon = nodeElement.querySelector(".expand_icon");
         if (currentNode.expanded == true) {
             node__children.classList.remove("hidden");
             if (expand_icon.innerText.length > 0) {
                 expand_icon.innerText = "-";
+                node__content.classList.add("focus");
             }
         }
         else {
             node__children.classList.add("hidden");
             if (expand_icon.innerText.length > 0) {
                 expand_icon.innerText = "+";
+                node__content.classList.remove("focus");
             }
         }
     }
@@ -600,10 +603,12 @@ class TreeListView {
             let childrenHtml = this.getHtmlFromTreeNode(childNode, floor + 1);
             let spaces = Array(floor).fill('&nbsp&nbsp&nbsp').join('');
             let node = `
-                    <div class="node ${icon ? 'has-children' : ''}" data-node-id="${childNode.id}">
-                        <span>${spaces}</span>
-                        <span class="expand_icon">${icon}</span>
-                        <span class="node__name">${childNode.name}</span>
+                    <div class="tree_view_node ${icon ? 'has-children' : ''}" data-node-id="${childNode.id}">
+                        <div class="node__content">
+                            <span>${spaces}</span>
+                            <span class="expand_icon">${icon}</span>
+                            <span class="node__name">${childNode.name}</span>
+                        </div>
                     	<div class ="node__children hidden">
                         	${childrenHtml}
                        </div>
@@ -634,13 +639,12 @@ class TreeListView {
     }
     // 根据点击事件查找当前节点
     getTriggerEventNode(event) {
-        const el = event.target;
-        if (!el.classList.contains("node__name"))
+        debugger;
+        const { nodeId, el } = findParentId(event.target);
+        if (!nodeId)
             return {};
-        const nodeElement = el.closest(".node");
-        const nodeId = nodeElement.dataset.nodeId;
         const currentNode = this.getNodeById(nodeId, this.rootNode);
-        return { currentNode, nodeElement };
+        return { currentNode, nodeElement: el };
     }
     // 根据 id 查找节点，如果未找到返回 null - DFS 
     getNodeById(id, treeRoot = this.rootNode) {
@@ -655,6 +659,18 @@ class TreeListView {
     }
 }
 exports.TreeListView = TreeListView;
+// 沿Dom路径向上查找含有id的阶段
+function findParentId(el) {
+    for (let i = 0; i < 3 && el.parentNode; i++) {
+        const id = el.getAttribute("data-node-id");
+        if (id) {
+            return { nodeId: id, el };
+        }
+        /*@ts-ignore**/
+        el = el.parentNode;
+    }
+    return {};
+}
 
 
 /***/ }),

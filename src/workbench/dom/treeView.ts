@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 14:28:02
+ * @LastEditTime: 2023-08-28 17:23:55
  * @Description: 树状列表组件 用于文件展示等功能
  */
 
@@ -70,23 +70,26 @@ export class TreeListView {
 
         const { currentNode, nodeElement } = this.getTriggerEventNode(event)
 
-        if (!currentNode) return
+        if (!currentNode || !nodeElement) return
 
         currentNode.expanded = !currentNode.expanded
 
-        const node__children = nodeElement.querySelector(".node__children")
-        const expand_icon = nodeElement.querySelector(".expand_icon")
+        const node__content = nodeElement.querySelector(".node__content")! as HTMLSpanElement
+        const node__children = nodeElement.querySelector(".node__children")! as HTMLSpanElement
+        const expand_icon = nodeElement.querySelector(".expand_icon")! as HTMLSpanElement
 
         if (currentNode.expanded == true) {
             node__children.classList.remove("hidden")
             if (expand_icon.innerText.length > 0) {
                 expand_icon.innerText = "-"
+                node__content.classList.add("focus")
             }
 
         } else {
             node__children.classList.add("hidden")
             if (expand_icon.innerText.length > 0) {
                 expand_icon.innerText = "+"
+                node__content.classList.remove("focus")
             }
         }
     }
@@ -102,10 +105,12 @@ export class TreeListView {
             let spaces = Array(floor).fill('&nbsp&nbsp&nbsp').join('');
 
             let node = `
-                    <div class="node ${icon ? 'has-children' : ''}" data-node-id="${childNode.id}">
-                        <span>${spaces}</span>
-                        <span class="expand_icon">${icon}</span>
-                        <span class="node__name">${childNode.name}</span>
+                    <div class="tree_view_node ${icon ? 'has-children' : ''}" data-node-id="${childNode.id}">
+                        <div class="node__content">
+                            <span>${spaces}</span>
+                            <span class="expand_icon">${icon}</span>
+                            <span class="node__name">${childNode.name}</span>
+                        </div>
                     	<div class ="node__children hidden">
                         	${childrenHtml}
                        </div>
@@ -145,14 +150,11 @@ export class TreeListView {
 
     // 根据点击事件查找当前节点
     getTriggerEventNode(event: MouseEvent) {
-        const el = event.target as HTMLElement
-        if (!el.classList.contains("node__name")) return {}
+        const { nodeId, el } = findParentId(event.target as HTMLElement)
+        if (!nodeId) return {}
 
-        const nodeElement = el.closest(".node") as any;
-        const nodeId = nodeElement.dataset.nodeId;
         const currentNode = this.getNodeById(nodeId, this.rootNode)
-
-        return { currentNode, nodeElement }
+        return { currentNode, nodeElement: el }
     }
 
     // 根据 id 查找节点，如果未找到返回 null - DFS 
@@ -166,4 +168,19 @@ export class TreeListView {
 
         return null;
     }
+}
+
+
+// 沿Dom路径向上查找含有id的阶段
+function findParentId(el: HTMLElement): { nodeId?: string, el?: HTMLElement } {
+    for (let i = 0; i < 3 && el.parentNode; i++) {
+        const id = el.getAttribute("data-node-id")
+        if (id) {
+            return { nodeId: id, el };
+        }
+        /*@ts-ignore**/
+        el = el.parentNode;
+    }
+
+    return {};
 }

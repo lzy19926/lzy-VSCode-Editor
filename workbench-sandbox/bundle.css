@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 11:10:10
+ * @LastEditTime: 2023-08-28 16:36:47
  * @Description: 
  */
 
@@ -79,10 +79,18 @@ body {
     display: none;
 }
 
+.focus {
+    background-color: rgba(204, 204, 204, 0.3);
+}
+
 ul {
     padding: 5px;
 }
 
 .node__name {
     font-size: small;
+}
+
+.node__content:hover {
+    background-color: rgba(204, 204, 204, 0.3);
 }
