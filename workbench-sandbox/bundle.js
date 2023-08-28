@@ -777,7 +777,7 @@ exports.ITerminalPart = exports.TerminalPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 11:14:06
+ * @LastEditTime: 2023-08-28 12:33:56
  * @Description: 集成终端UI部分
  */
 const decorator_1 = __webpack_require__(2);
@@ -824,7 +824,10 @@ let TerminalPart = exports.TerminalPart = class TerminalPart {
     }
     // 将前端xtermUI链接到ws服务器-与启动的node-pty绑定
     // 通过xterm自带的AttachAddon插件自动实现与ws的交互
-    connectWebsocket() {
+    async connectWebsocket() {
+        //todo
+        const port = await this.ipcRendererService.invokeAPI("createTerminal");
+        console.log(port);
         const socketURL = "ws://127.0.0.1:9999";
         const ws = new WebSocket(socketURL);
         const attachAddon = new xterm_addon_attach_1.AttachAddon(ws);

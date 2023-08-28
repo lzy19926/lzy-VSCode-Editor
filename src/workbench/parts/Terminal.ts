@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 11:14:06
+ * @LastEditTime: 2023-08-28 12:35:09
  * @Description: 集成终端UI部分
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -59,8 +59,11 @@ export class TerminalPart implements ITerminalPart, Part {
 
     // 将前端xtermUI链接到ws服务器-与启动的node-pty绑定
     // 通过xterm自带的AttachAddon插件自动实现与ws的交互
-    connectWebsocket() {
-        const socketURL = "ws://127.0.0.1:9999";
+    async connectWebsocket() {
+        // 获取Terminal的WS服务端口
+        const wsPort = await this.ipcRendererService.invokeAPI("createTerminal")
+
+        const socketURL = `ws://127.0.0.1:${wsPort}`
         const ws = new WebSocket(socketURL);
 
         const attachAddon = new AttachAddon(ws);
