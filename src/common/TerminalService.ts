@@ -2,26 +2,21 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 12:29:03
- * @Description: 提供terminal相关服务
- * 1. 接收前端xterm输入信息,并转到node-pty中执行
+ * @LastEditTime: 2023-08-28 15:53:57
+ * @Description: 提供terminal相关服务  node-pty创建虚拟终端  通过WS与前端xtrem同步IO
  */
-
-import { createDecorator } from './IOC/decorator'
-import { registerSingleton } from './IOC/serviceCollection'
-import { checkPort } from './utils'
 import * as os from 'os'
 import * as pty from 'node-pty'
 import WebSocket from 'ws';
+import { createDecorator } from './IOC/decorator'
+import { registerSingleton } from './IOC/serviceCollection'
+import { checkPort } from './utils'
 
 export class TerminalService {
-
     private term?: pty.IPty
-    private ws_port: number = 9000 // 终端链接用ws开启端口
+    private ws_port: number = 9000 // ws端口
 
-    constructor() {
-
-    }
+    constructor() { }
 
     //todo 启动一个终端(可改进为支持多个终端  使用pid标记)
     public async create(): Promise<number> {
@@ -84,10 +79,9 @@ export class TerminalService {
             console.log('[Terminal Server] A client Connected.');
 
             term.onData(data => {
-                ws.send(data.trim());
+                ws.send(data);
             });
 
-            // 当收到来自客户端消息时处理函数.
             ws.on('message', message => {
                 const content = message.toString('utf-8')
                 console.log('[Terminal Server Received]: %s', content);
@@ -99,7 +93,6 @@ export class TerminalService {
             });
 
         });
-
     }
 
 }
