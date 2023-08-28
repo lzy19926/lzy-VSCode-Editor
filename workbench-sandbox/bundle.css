@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 16:36:47
+ * @LastEditTime: 2023-08-28 17:35:27
  * @Description: 
  */
 
@@ -92,5 +92,6 @@ ul {
 }
 
 .node__content:hover {
+    cursor: pointer;
     background-color: rgba(204, 204, 204, 0.3);
 }
