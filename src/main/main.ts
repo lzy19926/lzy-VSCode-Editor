@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-24 23:40:30
+ * @LastEditTime: 2023-08-26 23:58:54
  * @Description: 
  */
 
@@ -17,7 +17,7 @@ import { IPerformanceService } from '../common/PerformanceService';
 import { IWindowService } from '../common/WindowService';
 import { IProtocolService } from '../common/ProtocolService'
 import { IIPCMainService } from '../common/IPCMainService';
-
+import { ITerminalService } from '../common/TerminalService';
 import type { ServiceCollection } from '../common/IOC/serviceCollection'
 class CodeMain {
 
@@ -67,7 +67,10 @@ class CodeMain {
 
         const ipcMainService = instantiationService.createInstance(services.get(IIPCMainService))
         services.set(IIPCMainService, ipcMainService)
-        
+
+        const terminalService = instantiationService.createInstance(services.get(ITerminalService))
+        services.set(ITerminalService, terminalService)
+
         return [services, instantiationService]
     }
 

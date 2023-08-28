@@ -4,6 +4,17 @@
   "version": "1.0.0",
   "description": "仿写的VSCode编辑器",
   "main": "./out/main/main.js",
+  "pkg": {
+    "scripts": [
+      "./src/*.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "options": [
+      "experimental-modules"
+    ]
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startEle": "tsc && electron-forge start",
@@ -16,7 +27,11 @@
   "license": "ISC",
   "dependencies": {
     "monaco-editor": "^0.41.0",
-    "ts-loader": "^9.4.4"
+    "node-pty": "^1.0.0",
+    "ts-loader": "^9.4.4",
+    "xterm": "^5.2.1",
+    "xterm-addon-attach": "^0.8.0",
+    "xterm-addon-fit": "^0.7.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",
@@ -24,8 +39,10 @@
     "@electron-forge/maker-rpm": "^6.0.5",
     "@electron-forge/maker-squirrel": "^6.0.5",
     "@electron-forge/maker-zip": "^6.0.5",
+    "@types/ws": "^8.5.5",
     "electron": "^23.0.0",
     "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "ws": "^8.13.0"
   }
 }

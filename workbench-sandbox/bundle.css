@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-25 15:39:36
+ * @LastEditTime: 2023-08-28 11:10:10
  * @Description: 
  */
 
@@ -21,6 +21,7 @@ body {
     position: fixed;
     right: 0;
     top: 43px;
+    background-color: black;
 }
 
 .sideBar {
@@ -43,6 +44,34 @@ body {
     border-bottom: solid 3px #ccc;
 }
 
+.terminal_part {
+    height: 20%;
+    width: 85%;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    border-top: solid 3px #ccc;
+    background-color: black;
+}
+
+/* 给终端额外定制滚动条 */
+.xterm-viewport {
+    padding-left: 2px;
+}
+
+.xterm-screen {
+    padding-left: 4px;
+    padding-top: 2px;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+    width: 8px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+    background-color: rgba(204, 204, 204, 0.3);
+    ;
+}
 
 /* ! --------- 左侧菜单栏样式  */
 

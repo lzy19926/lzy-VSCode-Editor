@@ -2,12 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:58:58
+ * @LastEditTime: 2023-08-26 22:55:04
  * @Description: 运行于浏览器端的编辑器主模块
  */
 import { IEditorService } from './parts/Editor'
 import { ISideBarService } from './parts/SideBar'
 import { ITitleBarService } from './parts/TitleBar'
+import { ITerminalPart } from './parts/Terminal'
 import { IBroswerEventsService } from './services/BroswerEventsService'
 import { SyncDescriptor, getGlobalCollection } from '../common/IOC/serviceCollection';
 import { InstantiationService } from '../common/IOC/InstantiationService';
@@ -17,6 +18,7 @@ export const enum Parts {
     TITLEBAR_PART = 'workbench.parts.titlebar',
     SIDEBAR_PART = 'workbench.parts.sidebar',
     EDITOR_PART = 'workbench.parts.editor',
+    TERMINAL_PART = 'workbench.parts.terminal',
 }
 
 
@@ -29,13 +31,14 @@ export class Workbench {
         @IEditorService editorService: IEditorService,
         @ITitleBarService titleBarService: ITitleBarService,
         @ISideBarService sideBarService: ISideBarService,
-
+        @ITerminalPart terminalPart: ITerminalPart,
         // SERVICES
         @IBroswerEventsService broswerEventsService: IBroswerEventsService,
     ) {
         this.parts.set(Parts.EDITOR_PART, editorService)
         this.parts.set(Parts.SIDEBAR_PART, sideBarService)
         this.parts.set(Parts.TITLEBAR_PART, titleBarService)
+        this.parts.set(Parts.TERMINAL_PART, terminalPart)
     }
 
     open() {
@@ -47,6 +50,7 @@ export class Workbench {
             { id: Parts.EDITOR_PART, classList: ["editor"] },
             { id: Parts.SIDEBAR_PART, classList: ["sideBar"] },
             { id: Parts.TITLEBAR_PART, classList: ["titleBar"] },
+            { id: Parts.TERMINAL_PART, classList: ["terminal_part"] },
         ]
 
         for (const { id, classList } of needParts) {
