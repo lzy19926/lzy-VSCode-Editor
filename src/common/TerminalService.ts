@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 12:25:33
+ * @LastEditTime: 2023-08-28 12:29:03
  * @Description: 提供terminal相关服务
  * 1. 接收前端xterm输入信息,并转到node-pty中执行
  */
@@ -20,11 +20,11 @@ export class TerminalService {
     private ws_port: number = 9000 // 终端链接用ws开启端口
 
     constructor() {
-      
+
     }
 
     //todo 启动一个终端(可改进为支持多个终端  使用pid标记)
-    public async start(): Promise<number> {
+    public async create(): Promise<number> {
         const freePort = await this.getFreePort()
 
         if (freePort == -1) {
@@ -105,7 +105,7 @@ export class TerminalService {
 }
 
 export interface ITerminalService {
-    start(): void
+    create(): Promise<number>
 }
 
 export const ITerminalService = createDecorator<ITerminalService>("ITerminalService")
