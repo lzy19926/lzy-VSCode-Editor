@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 13:16:44
+ * @LastEditTime: 2023-08-28 15:22:09
  * @Description: 集成终端UI部分
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -32,6 +32,7 @@ export class TerminalPart implements ITerminalPart, Part {
 
         this.createTerminal()
         this.connectWebsocket()
+        this.autoResize()
     }
 
     // 创建xterm终端UI
@@ -51,7 +52,6 @@ export class TerminalPart implements ITerminalPart, Part {
         });
 
         term.open(this._container);
-
         term.writeln('LzyEditor Terminal opened with Windows PowerShell')
         term.writeln('PS C:\\Users\\Lzy19926>')
 
@@ -66,22 +66,28 @@ export class TerminalPart implements ITerminalPart, Part {
 
         const socketURL = `ws://127.0.0.1:${wsPort}`
         const ws = new WebSocket(socketURL);
-        // 自动ws交互插件
+
+        // 启动ws交互插件
         const attachAddon = new AttachAddon(ws);
         this._term.loadAddon(attachAddon);
-        // 自动resize插件
+
+        console.log("xterm ready");
+    }
+
+    // 使用插件提供终端自动响应式布局功能
+    autoResize() {
         const fitAddon = new FitAddon()
         this._term.loadAddon(fitAddon);
 
         window.addEventListener('resize', () => setTimeout(() => {
             fitAddon.fit()
         }, 100));
-        //
-        console.log("xterm ready");
     }
-
-
 }
+
+
+
+
 
 export interface ITerminalPart { }
 

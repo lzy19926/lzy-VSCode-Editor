@@ -777,7 +777,7 @@ exports.ITerminalPart = exports.TerminalPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 13:16:44
+ * @LastEditTime: 2023-08-28 15:21:08
  * @Description: 集成终端UI部分
  */
 const decorator_1 = __webpack_require__(2);
@@ -803,6 +803,7 @@ let TerminalPart = exports.TerminalPart = class TerminalPart {
         this._container = container;
         this.createTerminal();
         this.connectWebsocket();
+        this.autoResize();
     }
     // 创建xterm终端UI
     createTerminal() {
@@ -830,17 +831,26 @@ let TerminalPart = exports.TerminalPart = class TerminalPart {
         const wsPort = await this.ipcRendererService.invokeAPI("createTerminal");
         const socketURL = `ws://127.0.0.1:${wsPort}`;
         const ws = new WebSocket(socketURL);
-        // 自动ws交互插件
+        // 启动ws交互插件
         const attachAddon = new xterm_addon_attach_1.AttachAddon(ws);
         this._term.loadAddon(attachAddon);
-        // 自动resize插件
+        // 对从ws接收来的终端消息做预处理 处理clear终端的特殊情况
+        const term = this._term;
+        term.onData((data) => {
+            // 发送clear信号会接收大量空格
+            if (data.trim() == "") {
+                sendEnter();
+            }
+        });
+        console.log("xterm ready");
+    }
+    // 使用插件提供终端自动响应式布局功能
+    autoResize() {
         const fitAddon = new xterm_addon_fit_1.FitAddon();
         this._term.loadAddon(fitAddon);
         window.addEventListener('resize', () => setTimeout(() => {
             fitAddon.fit();
         }, 100));
-        //
-        console.log("xterm ready");
     }
 };
 exports.TerminalPart = TerminalPart = __decorate([
@@ -848,6 +858,17 @@ exports.TerminalPart = TerminalPart = __decorate([
     __param(1, SideBar_1.ISideBarService),
     __param(2, IPCRendererService_1.IIPCRendererService)
 ], TerminalPart);
+// 在输入区域发送 Enter 键盘事件
+function sendEnter() {
+    const ev = new KeyboardEvent("keypress", {
+        "code": "Enter",
+        "key": "Enter",
+        "charCode": 13,
+        "keyCode": 13,
+        "which": 13,
+    });
+    document.dispatchEvent(ev);
+}
 exports.ITerminalPart = (0, decorator_1.createDecorator)("ITerminalPart");
 (0, serviceCollection_1.registerSingleton)(exports.ITerminalPart, TerminalPart);
 
