@@ -2,12 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:41:27
+ * @LastEditTime: 2023-08-28 16:00:23
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
+import { Part } from './Part'
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { Part } from './Part'
+
 import type { TextFileModel } from '../services/TextFileService'
 
 
@@ -32,8 +33,7 @@ export class EditorPart implements IEditorService, Part {
         this._container.style.height = "95%"
     }
 
-    // 加载monaco-editor
-    //todo 这里需要解决路径问题
+    // 加载monaco-editor  //todo 这里需要解决路径问题
     private loadMonaco() {
         const requireConfig = { paths: { 'vs': '../node_modules/monaco-editor/min/vs' } };
         const require: any = window.require // 解决ts报错
@@ -60,10 +60,8 @@ export class EditorPart implements IEditorService, Part {
         document.getElementsByTagName('head')[0].appendChild(link);
     }
 
-    // 编辑器响应式布局重绘功能
+    // 编辑器响应式布局重绘功能 监听resize事件实现
     private reloadEditor() {
-
-        // 监听 Window 的 resize事件以触发菜单栏重绘、同时更新 Monaco Editor 的宽度与高度
         window.addEventListener('resize', () => {
             const height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) - this._container.offsetTop;
 

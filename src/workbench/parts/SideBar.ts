@@ -2,14 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:42:46
+ * @LastEditTime: 2023-08-28 16:02:00
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
+import { IIPCRendererService } from '../services/IPCRendererService'
 import { ITextFileService } from '../services/TextFileService'
 import { IEditorService } from './Editor'
-import { IIPCRendererService } from '../services/IPCRendererService'
 import { TreeListView } from '../dom/treeView'
 import { Part } from './Part'
 
@@ -24,7 +24,7 @@ export class SideBarPart implements ISideBarService, Part {
     ) {
 
     }
-
+    // 创建SideBar本体
     create(container: HTMLElement): void {
         this._container = container
     }
@@ -40,7 +40,7 @@ export class SideBarPart implements ISideBarService, Part {
         tree.render(this._container)
     }
 
-    //ul事件 渲染单个文件
+    // 渲染单个文件
     async event_loadFileContent(e: MouseEvent, node: any) {
         console.log("--fileInfo--", node);
 

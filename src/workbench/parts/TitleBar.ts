@@ -2,14 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:57:24
+ * @LastEditTime: 2023-08-28 16:03:24
  * @Description: 顶部导航菜单栏
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { IEditorService } from './Editor'
-import { ISideBarService } from './SideBar'
 import { IIPCRendererService } from '../services/IPCRendererService'
+import { ISideBarService } from './SideBar'
+import { IEditorService } from './Editor'
 import { Part } from './Part'
 
 export class TitleBarPart implements ITitleBarService, Part {
@@ -26,7 +26,6 @@ export class TitleBarPart implements ITitleBarService, Part {
 
     create(container: HTMLElement): void {
         this._container = container
-
         this.createOpenDirBtn()
         this.createOpenFileBtn()
 

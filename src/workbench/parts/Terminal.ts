@@ -2,18 +2,19 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 15:22:09
+ * @LastEditTime: 2023-08-28 16:02:37
  * @Description: 集成终端UI部分
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { IEditorService } from './Editor'
-import { ISideBarService } from './SideBar'
 import { IIPCRendererService } from '../services/IPCRendererService'
-import { Part } from './Part'
-import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit'
+import { ISideBarService } from './SideBar'
+import { IEditorService } from './Editor'
 import { AttachAddon } from "xterm-addon-attach";
+import { FitAddon } from 'xterm-addon-fit'
+import { Terminal } from 'xterm';
+import { Part } from './Part'
+
 
 export class TerminalPart implements ITerminalPart, Part {
     private _container!: HTMLElement
@@ -29,7 +30,6 @@ export class TerminalPart implements ITerminalPart, Part {
 
     create(container: HTMLElement): void {
         this._container = container
-
         this.createTerminal()
         this.connectWebsocket()
         this.autoResize()

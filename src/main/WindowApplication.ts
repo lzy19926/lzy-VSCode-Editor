@@ -34,14 +34,13 @@ export class WindowApplicationService implements IWindowApplicationService {
             this.openEmptyWindow()
         })
     }
-
+    // 创建窗口
     openEmptyWindow() {
-        this.createWindow()
+        this._createWindow()
         this.load()
     }
 
-    // 创建窗口
-    createWindow() {
+    _createWindow() {
         this._win = new BrowserWindow({
             width: 800,
             height: 600,
@@ -56,8 +55,6 @@ export class WindowApplicationService implements IWindowApplicationService {
 
         this._win.setMinimumSize(400, 50); // 窗口长宽最小值
     }
-
-
 
     // 加载窗口资源
     load() {

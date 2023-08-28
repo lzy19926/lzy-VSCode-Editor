@@ -77,12 +77,10 @@ export class TextFileService {
         return { id, text, buffer }
     }
 
-
     // 通知文件进程写回文件内容到硬盘
     private updateDiskFile(path: string, content: string) {
         this.ipcRendererService.invokeAPI("writeFileTextSync", { path, text: content })
         console.log(`Update File:[[${path}]] in Disk Succeed`);
-
     }
 
 }
