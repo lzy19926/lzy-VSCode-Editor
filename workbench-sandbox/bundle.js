@@ -27,9 +27,9 @@ const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
 const TitleBar_1 = __webpack_require__(9);
 const Terminal_1 = __webpack_require__(10);
-const BroswerEventsService_1 = __webpack_require__(13);
+const BroswerEventsService_1 = __webpack_require__(14);
 const serviceCollection_1 = __webpack_require__(3);
-const InstantiationService_1 = __webpack_require__(14);
+const InstantiationService_1 = __webpack_require__(15);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -777,7 +777,7 @@ exports.ITerminalPart = exports.TerminalPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 12:33:56
+ * @LastEditTime: 2023-08-28 13:16:44
  * @Description: 集成终端UI部分
  */
 const decorator_1 = __webpack_require__(2);
@@ -786,7 +786,8 @@ const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
 const IPCRendererService_1 = __webpack_require__(7);
 const xterm_1 = __webpack_require__(11);
-const xterm_addon_attach_1 = __webpack_require__(12);
+const xterm_addon_fit_1 = __webpack_require__(12);
+const xterm_addon_attach_1 = __webpack_require__(13);
 let TerminalPart = exports.TerminalPart = class TerminalPart {
     editorService;
     sideBarService;
@@ -825,13 +826,20 @@ let TerminalPart = exports.TerminalPart = class TerminalPart {
     // 将前端xtermUI链接到ws服务器-与启动的node-pty绑定
     // 通过xterm自带的AttachAddon插件自动实现与ws的交互
     async connectWebsocket() {
-        //todo
-        const port = await this.ipcRendererService.invokeAPI("createTerminal");
-        console.log(port);
-        const socketURL = "ws://127.0.0.1:9999";
+        // 获取Terminal的WS服务端口
+        const wsPort = await this.ipcRendererService.invokeAPI("createTerminal");
+        const socketURL = `ws://127.0.0.1:${wsPort}`;
         const ws = new WebSocket(socketURL);
+        // 自动ws交互插件
         const attachAddon = new xterm_addon_attach_1.AttachAddon(ws);
         this._term.loadAddon(attachAddon);
+        // 自动resize插件
+        const fitAddon = new xterm_addon_fit_1.FitAddon();
+        this._term.loadAddon(fitAddon);
+        window.addEventListener('resize', () => setTimeout(() => {
+            fitAddon.fit();
+        }, 100));
+        //
         console.log("xterm ready");
     }
 };
@@ -855,11 +863,18 @@ exports.ITerminalPart = (0, decorator_1.createDecorator)("ITerminalPart");
 /* 12 */
 /***/ ((module) => {
 
+!function(e,t){ true?module.exports=t():0}(self,(function(){return(()=>{"use strict";var e={};return(()=>{var t=e;Object.defineProperty(t,"__esModule",{value:!0}),t.FitAddon=void 0,t.FitAddon=class{constructor(){}activate(e){this._terminal=e}dispose(){}fit(){const e=this.proposeDimensions();if(!e||!this._terminal||isNaN(e.cols)||isNaN(e.rows))return;const t=this._terminal._core;this._terminal.rows===e.rows&&this._terminal.cols===e.cols||(t._renderService.clear(),this._terminal.resize(e.cols,e.rows))}proposeDimensions(){if(!this._terminal)return;if(!this._terminal.element||!this._terminal.element.parentElement)return;const e=this._terminal._core,t=e._renderService.dimensions;if(0===t.css.cell.width||0===t.css.cell.height)return;const r=0===this._terminal.options.scrollback?0:e.viewport.scrollBarWidth,i=window.getComputedStyle(this._terminal.element.parentElement),o=parseInt(i.getPropertyValue("height")),s=Math.max(0,parseInt(i.getPropertyValue("width"))),n=window.getComputedStyle(this._terminal.element),l=o-(parseInt(n.getPropertyValue("padding-top"))+parseInt(n.getPropertyValue("padding-bottom"))),a=s-(parseInt(n.getPropertyValue("padding-right"))+parseInt(n.getPropertyValue("padding-left")))-r;return{cols:Math.max(2,Math.floor(a/t.css.cell.width)),rows:Math.max(1,Math.floor(l/t.css.cell.height))}}}})(),e})()}));
+//# sourceMappingURL=xterm-addon-fit.js.map
+
+/***/ }),
+/* 13 */
+/***/ ((module) => {
+
 !function(e,t){ true?module.exports=t():0}(self,(function(){return(()=>{"use strict";var e={};return(()=>{var t=e;function s(e,t,s){return e.addEventListener(t,s),{dispose:()=>{s&&e.removeEventListener(t,s)}}}Object.defineProperty(t,"__esModule",{value:!0}),t.AttachAddon=void 0,t.AttachAddon=class{constructor(e,t){this._disposables=[],this._socket=e,this._socket.binaryType="arraybuffer",this._bidirectional=!(t&&!1===t.bidirectional)}activate(e){this._disposables.push(s(this._socket,"message",(t=>{const s=t.data;e.write("string"==typeof s?s:new Uint8Array(s))}))),this._bidirectional&&(this._disposables.push(e.onData((e=>this._sendData(e)))),this._disposables.push(e.onBinary((e=>this._sendBinary(e))))),this._disposables.push(s(this._socket,"close",(()=>this.dispose()))),this._disposables.push(s(this._socket,"error",(()=>this.dispose())))}dispose(){for(const e of this._disposables)e.dispose()}_sendData(e){this._checkOpenSocket()&&this._socket.send(e)}_sendBinary(e){if(!this._checkOpenSocket())return;const t=new Uint8Array(e.length);for(let s=0;s<e.length;++s)t[s]=255&e.charCodeAt(s);this._socket.send(t)}_checkOpenSocket(){switch(this._socket.readyState){case WebSocket.OPEN:return!0;case WebSocket.CONNECTING:throw new Error("Attach addon was loaded before socket was open");case WebSocket.CLOSING:return console.warn("Attach addon socket is closing"),!1;case WebSocket.CLOSED:throw new Error("Attach addon socket is closed");default:throw new Error("Unexpected socket state")}}}})(),e})()}));
 //# sourceMappingURL=xterm-addon-attach.js.map
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -914,7 +929,7 @@ exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEvents
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
