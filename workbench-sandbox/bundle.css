@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 17:35:27
+ * @LastEditTime: 2023-08-28 18:09:31
  * @Description: 
  */
 
@@ -24,15 +24,6 @@ body {
     background-color: black;
 }
 
-.sideBar {
-    height: 100%;
-    width: 15%;
-    position: fixed;
-    left: -3px;
-    top: 43px;
-    background-color: rgb(206, 100, 7);
-    border-right: solid 3px #ccc;
-}
 
 .titleBar {
     height: 40px;
@@ -43,6 +34,10 @@ body {
     background-color: brown;
     border-bottom: solid 3px #ccc;
 }
+
+
+
+/* ! --------- 终端样式  */
 
 .terminal_part {
     height: 20%;
@@ -70,10 +65,29 @@ body {
 
 .xterm-viewport::-webkit-scrollbar-thumb {
     background-color: rgba(204, 204, 204, 0.3);
-    ;
 }
 
 /* ! --------- 左侧菜单栏样式  */
+
+.sideBar {
+    height: 100%;
+    width: 15%;
+    position: fixed;
+    left: -3px;
+    top: 43px;
+    background-color: rgb(206, 100, 7);
+    border-right: solid 3px #ccc;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.sideBar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sideBar::-webkit-scrollbar-thumb {
+    background-color: rgba(204, 204, 204, 0.3);
+}
 
 .hidden {
     display: none;
@@ -87,8 +101,13 @@ ul {
     padding: 5px;
 }
 
-.node__name {
-    font-size: small;
+.tree_view_node {
+    white-space: nowrap;
+}
+
+.node__content {
+    padding: 2px 0px 2px 5px;
+    font-size: 12px;
 }
 
 .node__content:hover {

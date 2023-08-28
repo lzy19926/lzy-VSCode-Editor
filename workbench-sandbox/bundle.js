@@ -521,7 +521,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 17:22:20
+ * @LastEditTime: 2023-08-28 18:06:12
  * @Description: 树状列表组件 用于文件展示等功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -583,14 +583,14 @@ class TreeListView {
         if (currentNode.expanded == true) {
             node__children.classList.remove("hidden");
             if (expand_icon.innerText.length > 0) {
-                expand_icon.innerText = "-";
+                expand_icon.innerText = "∨";
                 node__content.classList.add("focus");
             }
         }
         else {
             node__children.classList.add("hidden");
             if (expand_icon.innerText.length > 0) {
-                expand_icon.innerText = "+";
+                expand_icon.innerText = ">";
                 node__content.classList.remove("focus");
             }
         }
@@ -599,7 +599,7 @@ class TreeListView {
     getHtmlFromTreeNode(treeRootNode, floor) {
         const result = [];
         treeRootNode.children.forEach(childNode => {
-            let icon = childNode.children.length > 0 ? '+' : '';
+            let icon = childNode.children.length > 0 ? '>' : '&nbsp&nbsp';
             let childrenHtml = this.getHtmlFromTreeNode(childNode, floor + 1);
             let spaces = Array(floor).fill('&nbsp&nbsp&nbsp').join('');
             let node = `
@@ -639,7 +639,6 @@ class TreeListView {
     }
     // 根据点击事件查找当前节点
     getTriggerEventNode(event) {
-        debugger;
         const { nodeId, el } = findParentId(event.target);
         if (!nodeId)
             return {};

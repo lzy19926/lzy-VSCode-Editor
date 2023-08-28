@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 17:45:57
+ * @LastEditTime: 2023-08-28 18:06:12
  * @Description: 树状列表组件 用于文件展示等功能
  */
 
@@ -100,7 +100,7 @@ export class TreeListView {
         const result: string[] = [];
 
         treeRootNode.children.forEach(childNode => {
-            let icon = childNode.children.length > 0 ? '>' : '';
+            let icon = childNode.children.length > 0 ? '>' : '&nbsp&nbsp';
             let childrenHtml = this.getHtmlFromTreeNode(childNode, floor + 1)
             let spaces = Array(floor).fill('&nbsp&nbsp&nbsp').join('');
 
