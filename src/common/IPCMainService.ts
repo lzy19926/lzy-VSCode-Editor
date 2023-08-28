@@ -2,17 +2,21 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 12:33:30
+ * @LastEditTime: 2023-08-28 15:35:15
  * @Description: 运行在主进程中的IPC通信模块  用于接收子进程的服务请求  或者转发子进程消息给其他子进程
+ * 通过IPC模块进行通信 以替代网络通信
  */
 import { ipcMain } from "electron"
 import { createDecorator } from './IOC/decorator'
 import { registerSingleton } from './IOC/serviceCollection'
-import { apiFactory } from "./api/apiFactory"
+import { apiFactory, LZY_API } from "./api/apiFactory"
 
 export class IPCMainService {
 
+    API!: LZY_API
+
     constructor() {
+        this.API = apiFactory()
         this.listen()
     }
 
@@ -25,8 +29,7 @@ export class IPCMainService {
 
     // 处理API调用请求
     listenAPI() {
-
-        const API = apiFactory()
+        const API = this.API
 
         // invoke和handle两个API用于实现ipc的网络请求格式
         // https://www.electronjs.org/zh/docs/latest/api/ipc-renderer#ipcrendererinvokechannel-args
@@ -46,8 +49,6 @@ export class IPCMainService {
                     break;
                 case "createTerminal": res = API.createTerminal()
                     break;
-
-
                 default:
             }
 
@@ -68,7 +69,3 @@ export interface IIPCMainService { }
 
 export const IIPCMainService = createDecorator<IIPCMainService>("IIPCMainService")
 registerSingleton(IIPCMainService, IPCMainService)
-
-
-
-//

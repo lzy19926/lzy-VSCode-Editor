@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:22:22
+ * @LastEditTime: 2023-08-28 15:33:49
  * @Description: 用于读取和解析文件的服务
  */
 
@@ -30,15 +30,16 @@ export class FileService {
     public readFileBuffer(path: string): Buffer {
         return fs.readFileSync(decodeURIComponent(path))
     }
+
     public readFileText(path: string, charset: BufferEncoding = "utf-8"): string {
         return fs.readFileSync(decodeURIComponent(path)).toString(charset)
     }
+
     public writeFileText(path: string, text: string): void {
         return fs.writeFileSync(decodeURIComponent(path), text)
     }
 
-    // 打开对话框 获取文件夹内文件树
-    // 渲染进程无法获取系统数据  故在主进程中获取  并于渲染进程通信
+    // 打开对话框 获取文件夹内文件树 渲染进程无法获取系统数据  故在主进程中获取
     public async getFileTreeFromDir(): Promise<FileTreeNode | undefined> {
         const result = await this.dialog.showOpenDialog({ properties: ['openDirectory'] })
         return !result.canceled

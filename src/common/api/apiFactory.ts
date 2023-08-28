@@ -13,7 +13,7 @@ import type { FileTreeNode } from "../../common/FileService"
 import { accessor } from './ServiceAccessor'
 
 
-interface LZY_API {
+export interface LZY_API {
     readFileTextSync(path: string): string
     readFileBufferSync(path: string): Buffer
     writeFileTextSync(path: string, text: string): void
@@ -30,7 +30,7 @@ export function apiFactory(): LZY_API {
         readFileTextSync: (path: string) => {
             return extHostFileService.readFileText(path)
         },
-        
+
         readFileBufferSync: (path: string) => {
             return extHostFileService.readFileBuffer(path)
         },
