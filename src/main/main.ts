@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 23:58:54
+ * @LastEditTime: 2023-08-30 10:57:44
  * @Description: 应用主进程的入口
  */
 
@@ -32,7 +32,7 @@ class CodeMain {
         }
     }
 
-    // 
+    // 初始化
     private async startUp() {
         // 初始化service
         const [services, instantiationService] = this.createServices()

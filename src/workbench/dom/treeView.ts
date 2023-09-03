@@ -1,8 +1,15 @@
 /*
  * @Author: Luzy
+ * @Date: 2023-08-25 01:11:50
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-03 17:41:37
+ * @Description: 
+ */
+/*
+ * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 18:06:12
+ * @LastEditTime: 2023-09-02 14:38:13
  * @Description: 树状列表组件 用于文件展示等功能
  */
 
@@ -80,14 +87,14 @@ export class TreeListView {
 
         if (currentNode.expanded == true) {
             node__children.classList.remove("hidden")
-            if (expand_icon.innerText.length > 0) {
+            if (expand_icon.innerText.trim().length > 0) {
                 expand_icon.innerText = "∨"
                 node__content.classList.add("focus")
             }
 
         } else {
             node__children.classList.add("hidden")
-            if (expand_icon.innerText.length > 0) {
+            if (expand_icon.innerText.trim().length > 0) {
                 expand_icon.innerText = ">"
                 node__content.classList.remove("focus")
             }
@@ -95,6 +102,7 @@ export class TreeListView {
     }
 
     // 递归地获取树形结构的 HTML Text
+    //todo 使用innerHTML拼接字符串进行构建速度更快
     getHtmlFromTreeNode(treeRootNode: TreeNode, floor: number) {
 
         const result: string[] = [];

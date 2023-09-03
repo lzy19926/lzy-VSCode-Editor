@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 15:53:57
+ * @LastEditTime: 2023-08-30 09:49:47
  * @Description: 提供terminal相关服务  node-pty创建虚拟终端  通过WS与前端xtrem同步IO
  */
 import * as os from 'os'
@@ -70,7 +70,7 @@ export class TerminalService {
         this.term = term
     }
 
-    // 启动ws长连接-port:9999,与前端xtrem进行交互
+    // 启动ws长连接,与前端xtrem进行交互
     startWebsocketServer(port: number) {
         const wss = new WebSocket.Server({ port });
         const term = this.term as pty.IPty
