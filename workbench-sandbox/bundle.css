@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 17:47:37
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 18:09:31
+ * @LastEditTime: 2023-09-03 18:11:00
  * @Description: 
  */
 
@@ -13,20 +13,22 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    background-color: #ccc;
 }
 
+/* ! --------- 编辑器容器样式  */
 .editor {
     height: 100%;
     width: 85%;
     position: fixed;
     right: 0;
-    top: 43px;
+    top: 62px;
     background-color: black;
 }
 
-
+/* ! --------- 顶部菜单栏样式  */
 .titleBar {
-    height: 40px;
+    height: 35px;
     width: 100%;
     position: fixed;
     top: 0;
@@ -45,8 +47,8 @@ body {
     position: fixed;
     right: 0;
     bottom: 0;
-    border-top: solid 3px #ccc;
     background-color: black;
+    border-top: solid 3px #ccc;
 }
 
 /* 给终端额外定制滚动条 */
@@ -74,11 +76,12 @@ body {
     width: 15%;
     position: fixed;
     left: -3px;
-    top: 43px;
+    top: 37px;
     background-color: rgb(206, 100, 7);
-    border-right: solid 3px #ccc;
+    border-right: solid 5px #ccc;
     overflow-x: hidden;
     overflow-y: scroll;
+    z-index: -999;
 }
 
 .sideBar::-webkit-scrollbar {
@@ -113,4 +116,17 @@ ul {
 .node__content:hover {
     cursor: pointer;
     background-color: rgba(204, 204, 204, 0.3);
+}
+
+
+/* ! --------- 打开的文件tab栏样式  */
+
+.filetab_part {
+    height: 25px;
+    width: 85%;
+    position: fixed;
+    top: 35px;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.850);
+    border-top: solid 3px #ccc;
 }

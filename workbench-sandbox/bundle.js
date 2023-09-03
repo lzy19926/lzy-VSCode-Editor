@@ -20,30 +20,33 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 22:55:04
+ * @LastEditTime: 2023-09-03 17:46:58
  * @Description: 运行于浏览器端的编辑器主模块
  */
 const Editor_1 = __webpack_require__(1);
 const SideBar_1 = __webpack_require__(4);
 const TitleBar_1 = __webpack_require__(9);
 const Terminal_1 = __webpack_require__(10);
-const BroswerEventsService_1 = __webpack_require__(14);
+const FileTab_1 = __webpack_require__(14);
+const BroswerEventsService_1 = __webpack_require__(15);
 const serviceCollection_1 = __webpack_require__(3);
-const InstantiationService_1 = __webpack_require__(15);
+const InstantiationService_1 = __webpack_require__(16);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
     Parts["SIDEBAR_PART"] = "workbench.parts.sidebar";
     Parts["EDITOR_PART"] = "workbench.parts.editor";
     Parts["TERMINAL_PART"] = "workbench.parts.terminal";
+    Parts["FILETAB_PART"] = "workbench.parts.filetab";
 })(Parts || (exports.Parts = Parts = {}));
 let Workbench = exports.Workbench = class Workbench {
     parts = new Map();
-    constructor(editorService, titleBarService, sideBarService, terminalPart, broswerEventsService) {
+    constructor(editorService, titleBarService, sideBarService, terminalPart, fileTabPart, broswerEventsService) {
         this.parts.set(Parts.EDITOR_PART, editorService);
         this.parts.set(Parts.SIDEBAR_PART, sideBarService);
         this.parts.set(Parts.TITLEBAR_PART, titleBarService);
         this.parts.set(Parts.TERMINAL_PART, terminalPart);
+        this.parts.set(Parts.FILETAB_PART, fileTabPart);
     }
     open() {
         this.createParts();
@@ -54,6 +57,7 @@ let Workbench = exports.Workbench = class Workbench {
             { id: Parts.SIDEBAR_PART, classList: ["sideBar"] },
             { id: Parts.TITLEBAR_PART, classList: ["titleBar"] },
             { id: Parts.TERMINAL_PART, classList: ["terminal_part"] },
+            { id: Parts.FILETAB_PART, classList: ["filetab_part"] },
         ];
         for (const { id, classList } of needParts) {
             const partContainer = this.createPartContainer(id, classList);
@@ -73,7 +77,8 @@ exports.Workbench = Workbench = __decorate([
     __param(1, TitleBar_1.ITitleBarService),
     __param(2, SideBar_1.ISideBarService),
     __param(3, Terminal_1.ITerminalPart),
-    __param(4, BroswerEventsService_1.IBroswerEventsService)
+    __param(4, FileTab_1.IFileTabPart),
+    __param(5, BroswerEventsService_1.IBroswerEventsService)
 ], Workbench);
 // 创建运行workbench
 function main() {
@@ -519,9 +524,16 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
 
 /*
  * @Author: Luzy
+ * @Date: 2023-08-25 01:11:50
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-03 17:41:37
+ * @Description:
+ */
+/*
+ * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 18:06:12
+ * @LastEditTime: 2023-09-02 14:38:13
  * @Description: 树状列表组件 用于文件展示等功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -582,20 +594,21 @@ class TreeListView {
         const expand_icon = nodeElement.querySelector(".expand_icon");
         if (currentNode.expanded == true) {
             node__children.classList.remove("hidden");
-            if (expand_icon.innerText.length > 0) {
+            if (expand_icon.innerText.trim().length > 0) {
                 expand_icon.innerText = "∨";
                 node__content.classList.add("focus");
             }
         }
         else {
             node__children.classList.add("hidden");
-            if (expand_icon.innerText.length > 0) {
+            if (expand_icon.innerText.trim().length > 0) {
                 expand_icon.innerText = ">";
                 node__content.classList.remove("focus");
             }
         }
     }
     // 递归地获取树形结构的 HTML Text
+    //todo 使用innerHTML拼接字符串进行构建速度更快
     getHtmlFromTreeNode(treeRootNode, floor) {
         const result = [];
         treeRootNode.children.forEach(childNode => {
@@ -884,6 +897,40 @@ exports.ITerminalPart = (0, decorator_1.createDecorator)("ITerminalPart");
 
 /***/ }),
 /* 14 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-09-03 17:37:07
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-03 17:45:29
+ * @Description: 用于展示文件的tab栏
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IFileTabPart = exports.FileTabPart = void 0;
+const decorator_1 = __webpack_require__(2);
+const serviceCollection_1 = __webpack_require__(3);
+class FileTabPart {
+    _container;
+    constructor() { }
+    // 创建
+    create(container) {
+        this._container = container;
+    }
+    // 更新容器样式
+    updateStyle() {
+        this._container.style.height = "95%";
+    }
+}
+exports.FileTabPart = FileTabPart;
+exports.IFileTabPart = (0, decorator_1.createDecorator)("IEditorService");
+(0, serviceCollection_1.registerSingleton)(exports.IFileTabPart, FileTabPart);
+
+
+/***/ }),
+/* 15 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -938,7 +985,7 @@ exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEvents
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
