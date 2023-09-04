@@ -8,7 +8,6 @@
 import { Part } from './Part'
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-
 import type { TextFileModel } from '../services/TextFileService'
 
 

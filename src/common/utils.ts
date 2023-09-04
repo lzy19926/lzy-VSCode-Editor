@@ -1,3 +1,10 @@
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-25 12:02:51
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-04 21:21:32
+ * @Description: 
+ */
 import * as net from 'net'
 
 /**
@@ -21,7 +28,6 @@ export function parseUrlQuery(url: string) {
 
     return obj;
 }
-
 
 /**
  *检查某个端口是否可用（空闲）
@@ -48,8 +54,6 @@ export function checkPort(port: number): Promise<boolean> {
     })
 
 }
-
-
 
 /**
  * 从path字符串中解析出文件/文件夹名
