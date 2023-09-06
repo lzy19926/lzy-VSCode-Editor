@@ -296,7 +296,7 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:11:20
+ * @LastEditTime: 2023-09-06 18:53:05
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
@@ -336,10 +336,8 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         const isDir = node.origin?.isDir;
         if (isDir)
             return;
-        // todo 使用缓存
-        const fileAbsolutePath = node.origin?.absolutePath;
-        const fileText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path: fileAbsolutePath });
-        const model = this.textFileService.getFileModel(fileAbsolutePath, fileText);
+        // 通过文件node获取modal
+        const model = await this.textFileService.getFileModel(node);
         // 渲染文件Model
         this.editorService.loadFileModel(model);
         // 添加到tab栏中
@@ -399,7 +397,7 @@ exports.IIPCRendererService = (0, decorator_1.createDecorator)("IIPCRendererServ
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:54:51
+ * @LastEditTime: 2023-09-06 18:52:39
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -449,9 +447,12 @@ let TextFileService = exports.TextFileService = class TextFileService {
         }
     }
     // 获取文件模型
-    getFileModel(path, bufferOrText) {
+    async getFileModel(node) {
+        const path = node.origin?.absolutePath;
         let model = this.cacheFileService.get(path);
+        // 无缓存时  发请求获取文件数据
         if (!model) {
+            const bufferOrText = await this.ipcRendererService.invokeAPI("readFileTextSync", { path });
             model = this._createFileModel(path, bufferOrText);
             this.cacheFileService.set(path, model);
         }
@@ -535,7 +536,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 17:52:36
+ * @LastEditTime: 2023-09-06 18:25:33
  * @Description: 用于展示文件的tab栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -570,10 +571,6 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
     create(container) {
         this._container = container;
         this.renderFileTabs();
-    }
-    // 更新容器样式
-    updateStyle() {
-        this._container.style.height = "95%";
     }
     // 添加文件
     addFile(path) {
@@ -724,11 +721,11 @@ exports.stringHash = stringHash;
  * @Author: Luzy
  * @Date: 2023-08-24 12:04:24
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-03 18:53:41
+ * @LastEditTime: 2023-09-06 18:51:35
  * @Description: 树状列表组件 用于文件展示等功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TreeListView = void 0;
+exports.TreeListView = exports.TreeNode = void 0;
 // 根据树结构创建节点对象
 function createNodeTree(data) {
     const root = new TreeNode('root', data);
@@ -760,6 +757,7 @@ class TreeNode {
         this.children.push(node);
     }
 }
+exports.TreeNode = TreeNode;
 // 列表组件类
 class TreeListView {
     data;

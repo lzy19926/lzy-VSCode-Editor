@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 18:54:51
+ * @LastEditTime: 2023-09-06 18:52:39
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
@@ -11,6 +11,7 @@ import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ICacheFileService } from './CacheFileService'
 import { IEditorService } from '../parts/Editor'
 import { IIPCRendererService } from './IPCRendererService'
+import type { TreeNode } from '../dom/treeView'
 // 单个文本文件模型
 export type TextFileModel = {
     id: string
@@ -52,10 +53,15 @@ export class TextFileService {
     }
 
     // 获取文件模型
-    public getFileModel(path: string, bufferOrText: Buffer | string): TextFileModel {
+    public async getFileModel(node: TreeNode): Promise<TextFileModel> {
+
+        const path = node.origin?.absolutePath
+
         let model = this.cacheFileService.get(path)
 
+        // 无缓存时  发请求获取文件数据
         if (!model) {
+            const bufferOrText: Buffer | string = await this.ipcRendererService.invokeAPI("readFileTextSync", { path })
             model = this._createFileModel(path, bufferOrText)
             this.cacheFileService.set(path, model)
         }
@@ -87,7 +93,7 @@ export class TextFileService {
 
 export interface ITextFileService {
     diffCurrentFileModel(): void
-    getFileModel(path: string, bufferOrText: Buffer | string): TextFileModel
+    getFileModel(node: TreeNode): Promise<TextFileModel>
 }
 
 export const ITextFileService = createDecorator<ITextFileService>("ITextFileService")
