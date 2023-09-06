@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:52:39
+ * @LastEditTime: 2023-09-06 23:30:32
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
@@ -53,9 +53,7 @@ export class TextFileService {
     }
 
     // 获取文件模型
-    public async getFileModel(node: TreeNode): Promise<TextFileModel> {
-
-        const path = node.origin?.absolutePath
+    public async getFileModel(path: string): Promise<TextFileModel> {
 
         let model = this.cacheFileService.get(path)
 
@@ -93,7 +91,7 @@ export class TextFileService {
 
 export interface ITextFileService {
     diffCurrentFileModel(): void
-    getFileModel(node: TreeNode): Promise<TextFileModel>
+    getFileModel(path: string): Promise<TextFileModel>
 }
 
 export const ITextFileService = createDecorator<ITextFileService>("ITextFileService")

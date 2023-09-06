@@ -2,12 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:00:07
+ * @LastEditTime: 2023-09-06 23:53:07
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
-import { getFileName } from '../utils'
+import { getFileName, stringHash } from '../utils'
 export class TabView {
     readonly files: string[]
+    readonly ItemList: Map<string, HTMLElement> = new Map()
+
     tabsBody!: HTMLElement
 
     constructor(files: any) {
@@ -45,17 +47,19 @@ export class TabView {
         container.appendChild(this.tabsBody)
     }
 
-    addFile(path: string, id: string) {
+    addFile(path: string) {
         this.files.push(path)
-        const tabItem = this.createTabItem(path, id)
+        const tabItem = this.createTabItem(path)
         this.tabsBody.appendChild(tabItem)
-        this.focus(id)
+        this.focus(path)
+
+        return tabItem
     }
 
-    createTabItem(path: string, id: string) {
+    createTabItem(path: string) {
         const tabItem = document.createElement("div")
         tabItem.classList.add("filetab_item")
-        tabItem.id = `fileTab_${id}`
+        tabItem.id = this.generateId(path)
 
         const fileName = getFileName(path)
 
@@ -64,13 +68,15 @@ export class TabView {
         <div class="close_button">x</div>
         `
 
+        this.ItemList.set(path, tabItem)
+
         return tabItem
     }
 
     // 切换focus项
-    focus(id: string) {
-        const domId = `fileTab_${id}`
-        const tabItem = this.tabsBody.querySelector(`#${domId}`)
+    focus(path: string) {
+      
+        const tabItem = this.ItemList.get(path)
         const activeItem = this.tabsBody.querySelector(".focus")
 
         if (activeItem) {
@@ -81,5 +87,10 @@ export class TabView {
             tabItem.classList.add("focus")
         }
 
+    }
+
+    // 生成文件ID
+    generateId(path: string) {
+        return `fileTab_${stringHash(path)}`
     }
 }

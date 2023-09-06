@@ -296,7 +296,7 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:53:05
+ * @LastEditTime: 2023-09-06 23:31:02
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
@@ -333,11 +333,12 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
     // 渲染单个文件
     async event_loadFileContent(e, node) {
         console.log("--fileInfo--", node);
+        const absolutePath = node.origin?.absolutePath;
         const isDir = node.origin?.isDir;
         if (isDir)
             return;
         // 通过文件node获取modal
-        const model = await this.textFileService.getFileModel(node);
+        const model = await this.textFileService.getFileModel(absolutePath);
         // 渲染文件Model
         this.editorService.loadFileModel(model);
         // 添加到tab栏中
@@ -397,7 +398,7 @@ exports.IIPCRendererService = (0, decorator_1.createDecorator)("IIPCRendererServ
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:52:39
+ * @LastEditTime: 2023-09-06 23:30:32
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -447,8 +448,7 @@ let TextFileService = exports.TextFileService = class TextFileService {
         }
     }
     // 获取文件模型
-    async getFileModel(node) {
-        const path = node.origin?.absolutePath;
+    async getFileModel(path) {
         let model = this.cacheFileService.get(path);
         // 无缓存时  发请求获取文件数据
         if (!model) {
@@ -536,7 +536,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:25:33
+ * @LastEditTime: 2023-09-06 23:54:07
  * @Description: 用于展示文件的tab栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -550,20 +550,22 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IFileTabPart = exports.FileTabPart = void 0;
-const decorator_1 = __webpack_require__(2);
 const serviceCollection_1 = __webpack_require__(3);
-const TextFileService_1 = __webpack_require__(6);
+const decorator_1 = __webpack_require__(2);
 const CacheFileService_1 = __webpack_require__(7);
+const TextFileService_1 = __webpack_require__(6);
+const Editor_1 = __webpack_require__(1);
 const tabView_1 = __webpack_require__(9);
-const utils_1 = __webpack_require__(10);
 let FileTabPart = exports.FileTabPart = class FileTabPart {
+    editorService;
     cacheFileService;
     textFileService;
     _tab;
     fileList = [];
     fileSet = new Set();
     _container;
-    constructor(cacheFileService, textFileService) {
+    constructor(editorService, cacheFileService, textFileService) {
+        this.editorService = editorService;
         this.cacheFileService = cacheFileService;
         this.textFileService = textFileService;
     }
@@ -572,11 +574,14 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
         this._container = container;
         this.renderFileTabs();
     }
-    // 添加文件
+    // 添加文件,并给返回的dom添加加载文件事件
     addFile(path) {
         if (this._tab && !this.fileSet.has(path)) {
-            const id = (0, utils_1.stringHash)(path);
-            this._tab.addFile(path, id);
+            const tabItem = this._tab.addFile(path);
+            const wrappedEvent = (e) => {
+                this.event_loadFileContent.call(this, e, path);
+            };
+            tabItem.addEventListener('click', wrappedEvent);
         }
         this.fileSet.add(path);
     }
@@ -586,10 +591,17 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
         tab.render(this._container);
         this._tab = tab;
     }
+    // 节点事件,加载单个文件
+    async event_loadFileContent(e, path) {
+        const model = await this.textFileService.getFileModel(path);
+        this.editorService.loadFileModel(model);
+        this._tab.focus(path);
+    }
 };
 exports.FileTabPart = FileTabPart = __decorate([
-    __param(0, CacheFileService_1.ICacheFileService),
-    __param(1, TextFileService_1.ITextFileService)
+    __param(0, Editor_1.IEditorService),
+    __param(1, CacheFileService_1.ICacheFileService),
+    __param(2, TextFileService_1.ITextFileService)
 ], FileTabPart);
 exports.IFileTabPart = (0, decorator_1.createDecorator)("IFileTabPart");
 (0, serviceCollection_1.registerSingleton)(exports.IFileTabPart, FileTabPart);
@@ -607,12 +619,13 @@ exports.TabView = void 0;
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:00:07
+ * @LastEditTime: 2023-09-06 23:53:07
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
 const utils_1 = __webpack_require__(10);
 class TabView {
     files;
+    ItemList = new Map();
     tabsBody;
     constructor(files) {
         this.files = files;
@@ -642,27 +655,28 @@ class TabView {
         this.tabsBody.innerHTML = html;
         container.appendChild(this.tabsBody);
     }
-    addFile(path, id) {
+    addFile(path) {
         this.files.push(path);
-        const tabItem = this.createTabItem(path, id);
+        const tabItem = this.createTabItem(path);
         this.tabsBody.appendChild(tabItem);
-        this.focus(id);
+        this.focus(path);
+        return tabItem;
     }
-    createTabItem(path, id) {
+    createTabItem(path) {
         const tabItem = document.createElement("div");
         tabItem.classList.add("filetab_item");
-        tabItem.id = `fileTab_${id}`;
+        tabItem.id = this.generateId(path);
         const fileName = (0, utils_1.getFileName)(path);
         tabItem.innerHTML = `
         <div class="file_name">${fileName}</div>
         <div class="close_button">x</div>
         `;
+        this.ItemList.set(path, tabItem);
         return tabItem;
     }
     // 切换focus项
-    focus(id) {
-        const domId = `fileTab_${id}`;
-        const tabItem = this.tabsBody.querySelector(`#${domId}`);
+    focus(path) {
+        const tabItem = this.ItemList.get(path);
         const activeItem = this.tabsBody.querySelector(".focus");
         if (activeItem) {
             activeItem.classList.remove("focus");
@@ -670,6 +684,10 @@ class TabView {
         if (tabItem) {
             tabItem.classList.add("focus");
         }
+    }
+    // 生成文件ID
+    generateId(path) {
+        return `fileTab_${(0, utils_1.stringHash)(path)}`;
     }
 }
 exports.TabView = TabView;

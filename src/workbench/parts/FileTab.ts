@@ -2,27 +2,28 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:25:33
+ * @LastEditTime: 2023-09-06 23:54:07
  * @Description: 用于展示文件的tab栏
  */
 
-import { Part } from './Part'
-import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { ITextFileService } from '../services/TextFileService'
+import { createDecorator } from '../../common/IOC/decorator'
 import { ICacheFileService } from '../services/CacheFileService'
+import { ITextFileService } from '../services/TextFileService'
+import { IEditorService } from './Editor'
 import { TabView } from '../dom/tabView'
-import { stringHash } from '../utils'
+import { Part } from './Part'
+
 export class FileTabPart implements IFileTabPart, Part {
 
-    _tab?: TabView
+    _tab!: TabView
     fileList: string[] = []
     fileSet: Set<string> = new Set()
 
     private _container!: HTMLElement
 
-
     constructor(
+        @IEditorService private readonly editorService: IEditorService,
         @ICacheFileService private readonly cacheFileService: ICacheFileService,
         @ITextFileService private readonly textFileService: ITextFileService,
     ) { }
@@ -33,11 +34,17 @@ export class FileTabPart implements IFileTabPart, Part {
         this.renderFileTabs()
     }
 
-    // 添加文件
+    // 添加文件,并给返回的dom添加加载文件事件
     addFile(path: string) {
         if (this._tab && !this.fileSet.has(path)) {
-            const id = stringHash(path)
-            this._tab.addFile(path, id)
+
+            const tabItem = this._tab.addFile(path)
+
+            const wrappedEvent = (e: Event) => {
+                this.event_loadFileContent.call(this, e, path)
+            }
+
+            tabItem.addEventListener('click', wrappedEvent)
         }
 
         this.fileSet.add(path)
@@ -48,6 +55,16 @@ export class FileTabPart implements IFileTabPart, Part {
         const tab = new TabView(this.fileList)
         tab.render(this._container)
         this._tab = tab
+    }
+
+    // 节点事件,加载单个文件
+    async event_loadFileContent(e: Event, path: string) {
+
+        const model = await this.textFileService.getFileModel(path)
+
+        this.editorService.loadFileModel(model)
+
+        this._tab.focus(path)
     }
 }
 
