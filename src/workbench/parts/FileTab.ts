@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:37:36
+ * @LastEditTime: 2023-09-06 18:25:33
  * @Description: 用于展示文件的tab栏
  */
 
@@ -12,8 +12,7 @@ import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ITextFileService } from '../services/TextFileService'
 import { ICacheFileService } from '../services/CacheFileService'
 import { TabView } from '../dom/tabView'
-import { getFileName } from '../utils'
-
+import { stringHash } from '../utils'
 export class FileTabPart implements IFileTabPart, Part {
 
     _tab?: TabView
@@ -34,17 +33,11 @@ export class FileTabPart implements IFileTabPart, Part {
         this.renderFileTabs()
     }
 
-    // 更新容器样式
-    private updateStyle() {
-        this._container.style.height = "95%"
-    }
-
     // 添加文件
     addFile(path: string) {
-        debugger
         if (this._tab && !this.fileSet.has(path)) {
-            const fileName = getFileName(path)
-            this._tab.addFile(fileName)
+            const id = stringHash(path)
+            this._tab.addFile(path, id)
         }
 
         this.fileSet.add(path)

@@ -535,7 +535,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:37:36
+ * @LastEditTime: 2023-09-06 17:52:36
  * @Description: 用于展示文件的tab栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -577,10 +577,9 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
     }
     // 添加文件
     addFile(path) {
-        debugger;
         if (this._tab && !this.fileSet.has(path)) {
-            const fileName = (0, utils_1.getFileName)(path);
-            this._tab.addFile(fileName);
+            const id = (0, utils_1.stringHash)(path);
+            this._tab.addFile(path, id);
         }
         this.fileSet.add(path);
     }
@@ -601,19 +600,20 @@ exports.IFileTabPart = (0, decorator_1.createDecorator)("IFileTabPart");
 
 /***/ }),
 /* 9 */
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TabView = void 0;
 /*
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:35:11
+ * @LastEditTime: 2023-09-06 18:00:07
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TabView = void 0;
+const utils_1 = __webpack_require__(10);
 class TabView {
     files;
     tabsBody;
@@ -645,20 +645,34 @@ class TabView {
         this.tabsBody.innerHTML = html;
         container.appendChild(this.tabsBody);
     }
-    addFile(id) {
-        debugger;
-        this.files.push(id);
-        const tabItem = this.createTabItem(id);
+    addFile(path, id) {
+        this.files.push(path);
+        const tabItem = this.createTabItem(path, id);
         this.tabsBody.appendChild(tabItem);
+        this.focus(id);
     }
-    createTabItem(path) {
+    createTabItem(path, id) {
         const tabItem = document.createElement("div");
         tabItem.classList.add("filetab_item");
+        tabItem.id = `fileTab_${id}`;
+        const fileName = (0, utils_1.getFileName)(path);
         tabItem.innerHTML = `
-        <div class="file_name">${path}</div>
+        <div class="file_name">${fileName}</div>
         <div class="close_button">x</div>
         `;
         return tabItem;
+    }
+    // 切换focus项
+    focus(id) {
+        const domId = `fileTab_${id}`;
+        const tabItem = this.tabsBody.querySelector(`#${domId}`);
+        const activeItem = this.tabsBody.querySelector(".focus");
+        if (activeItem) {
+            activeItem.classList.remove("focus");
+        }
+        if (tabItem) {
+            tabItem.classList.add("focus");
+        }
     }
 }
 exports.TabView = TabView;
@@ -671,7 +685,7 @@ exports.TabView = TabView;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getFileName = void 0;
+exports.stringHash = exports.getFileName = void 0;
 /**
  * 从path字符串中解析出文件/文件夹名
 */
@@ -684,6 +698,20 @@ function getFileName(path) {
     return decodeURIComponent(fileName);
 }
 exports.getFileName = getFileName;
+/**生成简易字符串hash*/
+function stringHash(str) {
+    var hash = 0, i, chr;
+    if (str.length === 0)
+        return hash.toString();
+    for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    return hash.toString();
+}
+exports.stringHash = stringHash;
+;
 
 
 /***/ }),
