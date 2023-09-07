@@ -27,6 +27,7 @@
   "license": "ISC",
   "dependencies": {
     "monaco-editor": "^0.41.0",
+    "monaco-languageclient": "^6.4.6",
     "node-pty": "^1.0.0",
     "ts-loader": "^9.4.4",
     "xterm": "^5.2.1",

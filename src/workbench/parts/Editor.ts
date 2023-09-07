@@ -3,7 +3,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 11:04:25
+ * @LastEditTime: 2023-09-07 19:21:21
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { Part } from './Part'
@@ -14,7 +14,7 @@ import type { editor as monaco } from 'monaco-editor'
 
 type MonacoEditor = monaco.ICodeEditor
 
-export class EditorPart implements IEditorService, Part {
+export class EditorPart implements IEditorPart, Part {
     private _editor!: MonacoEditor
     private _container!: HTMLElement
     private _currentModel?: TextFileModel
@@ -99,7 +99,7 @@ export class EditorPart implements IEditorService, Part {
     }
 }
 
-export interface IEditorService {
+export interface IEditorPart {
     create(container: HTMLElement): void
     loadFileModel(model: TextFileModel): void
     clearContent(): void
@@ -107,5 +107,5 @@ export interface IEditorService {
     getCurrentText(): string
 }
 
-export const IEditorService = createDecorator<IEditorService>("IEditorService")
-registerSingleton(IEditorService, EditorPart)
+export const IEditorPart = createDecorator<IEditorPart>("IEditorPart")
+registerSingleton(IEditorPart, EditorPart)

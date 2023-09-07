@@ -2,24 +2,24 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 11:49:51
+ * @LastEditTime: 2023-09-07 19:25:44
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ITextFileService } from '../services/TextFileService'
 import { IFileTabPart } from './FileTab'
-import { IEditorService } from './Editor'
+import { IEditorPart } from './Editor'
 import { TreeListView } from '../dom/treeView'
 import { Part } from './Part'
 import type { TreeNode } from '../dom/treeView'
-export class SideBarPart implements ISideBarService, Part {
+export class SideBarPart implements ISideBarPart, Part {
 
     private _container!: HTMLElement
 
     constructor(
         @IFileTabPart private readonly fileTabPart: IFileTabPart,
-        @IEditorService private readonly editorService: IEditorService,
+        @IEditorPart private readonly editorPart: IEditorPart,
         @ITextFileService private readonly textFileService: ITextFileService,
     ) {
 
@@ -52,7 +52,7 @@ export class SideBarPart implements ISideBarService, Part {
         const model = await this.textFileService.getFileModel(absolutePath)
 
         // 渲染文件Model
-        this.editorService.loadFileModel(model)
+        this.editorPart.loadFileModel(model)
 
         // 添加到tab栏中
         this.fileTabPart.addTabItem(model.id)
@@ -63,9 +63,9 @@ export class SideBarPart implements ISideBarService, Part {
 
 
 
-export interface ISideBarService {
+export interface ISideBarPart {
     renderFileList(fileTree: any): void
 }
 
-export const ISideBarService = createDecorator<ISideBarService>("ISideBarService")
-registerSingleton(ISideBarService, SideBarPart)
+export const ISideBarPart = createDecorator<ISideBarPart>("ISideBarPart")
+registerSingleton(ISideBarPart, SideBarPart)

@@ -2,14 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 00:12:00
+ * @LastEditTime: 2023-09-07 19:54:44
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ICacheFileService } from './CacheFileService'
-import { IEditorService } from '../parts/Editor'
+import { IEditorPart } from '../parts/Editor'
 import { IIPCRendererService } from './IPCRendererService'
 import type { TreeNode } from '../dom/treeView'
 // 单个文本文件模型
@@ -25,7 +25,7 @@ export class TextFileService {
 
     constructor(
         @ICacheFileService private readonly cacheFileService: ICacheFileService,
-        @IEditorService private readonly editorService: IEditorService,
+        @IEditorPart private readonly editorPart: IEditorPart,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
 
@@ -36,8 +36,8 @@ export class TextFileService {
     // JsDiff：一个用于Web浏览器和Node.js 的JavaScript差异算法。它支持字符、标记以及行对比。
     // fast-jsdiff：JsDiff改进，并加入了Babylon diff补丁支持。
     diffCurrentFileModel() {
-        const currentText = this.editorService.getCurrentText()
-        const originModel = this.editorService.getCurrentModel()
+        const currentText = this.editorPart.getCurrentText()
+        const originModel = this.editorPart.getCurrentModel()
         if (originModel) {
             const id = originModel.id
 

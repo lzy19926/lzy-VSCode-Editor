@@ -2,14 +2,15 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 11:47:26
+ * @LastEditTime: 2023-09-07 20:03:19
  * @Description: 用于展示文件的tab栏
  */
 
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { createDecorator } from '../../common/IOC/decorator'
 import { ITextFileService } from '../services/TextFileService'
-import { IEditorService } from './Editor'
+import { ICommandService } from '../command/CommandService'
+import { IEditorPart } from './Editor'
 import { TabView } from '../dom/tabView'
 import { Part } from './Part'
 
@@ -22,7 +23,8 @@ export class FileTabPart implements IFileTabPart, Part {
     private _container!: HTMLElement
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService,
+        @IEditorPart private readonly editorPart: IEditorPart,
+        @ICommandService private readonly commandService: ICommandService,
         @ITextFileService private readonly textFileService: ITextFileService,
     ) { }
 
@@ -41,7 +43,7 @@ export class FileTabPart implements IFileTabPart, Part {
             this._tab.bindEvents(path, {
                 onClick: (e: Event) => {
                     e.stopPropagation()
-                    this.loadFileContent.call(this, path)
+                    this.commandService.executeCommand("workbench.action.loadFileContent", path)
                 },
                 onClose: (e: Event) => {
                     e.stopPropagation()
@@ -69,20 +71,10 @@ export class FileTabPart implements IFileTabPart, Part {
         this._tab = tab
     }
 
-    // 加载单个文件
-    async loadFileContent(path: string) {
-        const isCurrentModel = this.editorService.getCurrentModel()?.id == path
-        if (isCurrentModel) return
-
-        const model = await this.textFileService.getFileModel(path)
-        this.editorService.loadFileModel(model)
-        this._tab.focus(path)
-    }
-
     // 移除单个文件
     async removeFile(path: string) {
 
-        const isCurrentModel = this.editorService.getCurrentModel()?.id == path
+        const isCurrentModel = this.editorPart.getCurrentModel()?.id == path
 
         if (isCurrentModel) {
             this._loadPrevFile(path)
@@ -109,19 +101,24 @@ export class FileTabPart implements IFileTabPart, Part {
         }
 
         if (prevFileIdx == -1) {
-            this.editorService.clearContent()
+            this.editorPart.clearContent()
             return
         }
 
         const prevFilePath = this.fileList[prevFileIdx]
 
         if (prevFilePath) {
-            this.loadFileContent(prevFilePath)
+            this.commandService.executeCommand("workbench.action.loadFileContent", prevFilePath)
         }
+    }
+
+    focus(path: string) {
+        this._tab.focus(path)
     }
 }
 
 export interface IFileTabPart {
+    focus(path: string): void
     addTabItem(id: string): void
     removeTabItem(path: string): void
 }

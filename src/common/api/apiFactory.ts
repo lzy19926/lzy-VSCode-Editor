@@ -7,10 +7,10 @@
  */
 //! 使用contextBridge模块即可将node进程代码暴露给浏览器沙箱环境
 
+import { accessor } from './ServiceAccessor'
 import { IFileService } from "../../common/FileService"
 import { ITerminalService } from '../../common/TerminalService'
 import type { FileTreeNode } from "../../common/FileService"
-import { accessor } from './ServiceAccessor'
 
 
 export interface LZY_API {

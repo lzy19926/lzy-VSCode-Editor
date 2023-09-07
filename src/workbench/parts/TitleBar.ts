@@ -2,21 +2,20 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 16:03:24
+ * @LastEditTime: 2023-09-07 19:23:58
  * @Description: 顶部导航菜单栏
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { IIPCRendererService } from '../services/IPCRendererService'
-import { ISideBarService } from './SideBar'
-import { IEditorService } from './Editor'
+import { ISideBarPart } from './SideBar'
 import { Part } from './Part'
 
-export class TitleBarPart implements ITitleBarService, Part {
+export class TitleBarPart implements ITitleBarPart, Part {
     private _container!: HTMLElement
 
     constructor(
-        @ISideBarService private readonly sideBarService: ISideBarService,
+        @ISideBarPart private readonly sideBarPart: ISideBarPart,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) { }
 
@@ -25,7 +24,6 @@ export class TitleBarPart implements ITitleBarService, Part {
         this._container = container
         this.createOpenDirBtn()
         this.createOpenFileBtn()
-
     }
 
     // 打开文件夹按钮
@@ -48,7 +46,7 @@ export class TitleBarPart implements ITitleBarService, Part {
     async event_loadFiletreeFromDir(event: Event) {
         const res = await this.ipcRendererService.invokeAPI("getFileTreeFromDir")
         const fileTree = res
-        this.sideBarService.renderFileList(fileTree)
+        this.sideBarPart.renderFileList(fileTree)
     }
 
     //todo 需要重写 按钮事件 加载单个文件
@@ -72,7 +70,7 @@ export class TitleBarPart implements ITitleBarService, Part {
     }
 }
 
-export interface ITitleBarService { }
+export interface ITitleBarPart { }
 
-export const ITitleBarService = createDecorator<ITitleBarService>("ITitleBarService")
-registerSingleton(ITitleBarService, TitleBarPart)
+export const ITitleBarPart = createDecorator<ITitleBarPart>("ITitleBarPart")
+registerSingleton(ITitleBarPart, TitleBarPart)

@@ -2,12 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-03 17:46:58
+ * @LastEditTime: 2023-09-07 20:01:27
  * @Description: 运行于浏览器端的编辑器主模块
  */
-import { IEditorService } from './parts/Editor'
-import { ISideBarService } from './parts/SideBar'
-import { ITitleBarService } from './parts/TitleBar'
+import './command/commands'
+import { IEditorPart } from './parts/Editor'
+import { ISideBarPart } from './parts/SideBar'
+import { ITitleBarPart } from './parts/TitleBar'
 import { ITerminalPart } from './parts/Terminal'
 import { IFileTabPart } from './parts/FileTab'
 import { IBroswerEventsService } from './services/BroswerEventsService'
@@ -30,17 +31,17 @@ export class Workbench {
 
     constructor(
         // PARTS
-        @IEditorService editorService: IEditorService,
-        @ITitleBarService titleBarService: ITitleBarService,
-        @ISideBarService sideBarService: ISideBarService,
+        @IEditorPart editorPart: IEditorPart,
+        @ITitleBarPart titleBarPart: ITitleBarPart,
+        @ISideBarPart sideBarPart: ISideBarPart,
         @ITerminalPart terminalPart: ITerminalPart,
         @IFileTabPart fileTabPart: IFileTabPart,
         // SERVICES
         @IBroswerEventsService broswerEventsService: IBroswerEventsService,
     ) {
-        this.parts.set(Parts.EDITOR_PART, editorService)
-        this.parts.set(Parts.SIDEBAR_PART, sideBarService)
-        this.parts.set(Parts.TITLEBAR_PART, titleBarService)
+        this.parts.set(Parts.EDITOR_PART, editorPart)
+        this.parts.set(Parts.SIDEBAR_PART, sideBarPart)
+        this.parts.set(Parts.TITLEBAR_PART, titleBarPart)
         this.parts.set(Parts.TERMINAL_PART, terminalPart)
         this.parts.set(Parts.FILETAB_PART, fileTabPart)
     }

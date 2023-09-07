@@ -2,28 +2,33 @@
  * @Author: Luzy
  * @Date: 2023-08-26 14:22:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:28:01
+ * @LastEditTime: 2023-09-07 19:20:45
  * @Description: 通过该类确保直接获取创建API所需的service实例
  * 通过serviceCollection获取的可能是描述器而不是实例 
  */
 
-import { IFileService } from "../../common/FileService";
-import { ITerminalService } from '../../common/TerminalService'
+
+import { IEditorPart } from "../parts/Editor";
+import { IFileTabPart } from "../parts/FileTab";
+import { ITextFileService } from "../services/TextFileService"
 import { ServiceIdentifier } from "../../common/IOC/decorator"
 import { InstantiationService } from "../../common/IOC/InstantiationService";
 import { SyncDescriptor, getGlobalCollection } from "../../common/IOC/serviceCollection";
 
-class ServiceAccessor {
+
+class BroswerServiceAccessor {
 
     _services: Map<ServiceIdentifier<any>, any> = new Map()
 
     // 注入API所需的服务实例储存起来
     constructor(
-        @IFileService fileService: IFileService,
-        @ITerminalService terminalService: ITerminalService,
+        @IEditorPart private readonly editorPart: IEditorPart,
+        @IFileTabPart private readonly fileTabPart: IFileTabPart,
+        @ITextFileService private readonly textFileService: ITextFileService,
     ) {
-        this._services.set(IFileService, fileService)
-        this._services.set(ITerminalService, terminalService)
+        this._services.set(IEditorPart, editorPart)
+        this._services.set(IFileTabPart, fileTabPart)
+        this._services.set(ITextFileService, textFileService)
     }
 
     get<T>(id: ServiceIdentifier<T>): T {
@@ -37,7 +42,7 @@ class ServiceAccessor {
 
 
 const instanService = new InstantiationService(getGlobalCollection())
-export const accessor = instanService.createInstance(new SyncDescriptor(ServiceAccessor))
+export const accessor = instanService.createInstance(new SyncDescriptor(BroswerServiceAccessor))
 
 
 
