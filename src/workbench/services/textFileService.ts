@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:30:32
+ * @LastEditTime: 2023-09-07 00:12:00
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
@@ -52,6 +52,11 @@ export class TextFileService {
         }
     }
 
+    // 移除文件模型
+    removeFileModel(path: string) {
+        return this.cacheFileService.remove(path)
+    }
+
     // 获取文件模型
     public async getFileModel(path: string): Promise<TextFileModel> {
 
@@ -68,7 +73,7 @@ export class TextFileService {
     }
 
     // 创建文件模型(创建文件的Uint8Array和text)
-    private _createFileModel(id: string, bufferOrText: Buffer | string): TextFileModel {
+    private _createFileModel(path: string, bufferOrText: Buffer | string): TextFileModel {
         let text, buffer
 
         if (typeof bufferOrText == 'string') {
@@ -78,7 +83,7 @@ export class TextFileService {
             text = new TextDecoder().decode(buffer);
         }
 
-        return { id, text, buffer }
+        return { id: path, text, buffer }
     }
 
     // 通知文件进程写回文件内容到硬盘
@@ -92,6 +97,7 @@ export class TextFileService {
 export interface ITextFileService {
     diffCurrentFileModel(): void
     getFileModel(path: string): Promise<TextFileModel>
+    removeFileModel(path: string): boolean
 }
 
 export const ITextFileService = createDecorator<ITextFileService>("ITextFileService")

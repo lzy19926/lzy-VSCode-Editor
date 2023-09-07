@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:56:06
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:24:29
+ * @LastEditTime: 2023-09-07 00:08:39
  * @Description: 提供文本文件前端缓存功能
  */
 
@@ -26,6 +26,10 @@ export class CacheFileService {
         return this._cache.has(id)
     }
 
+    remove(id: string) {
+        return this._cache.delete(id)
+    }
+
     update(id: string, text: string) {
         const model = this._cache.get(id)
 
@@ -41,6 +45,7 @@ export interface ICacheFileService {
     get(id: string): TextFileModel | undefined
     set(id: string, model: TextFileModel): void
     has(id: string): boolean
+    remove(id: string): boolean
     update(id: string, text: string): void
 }
 

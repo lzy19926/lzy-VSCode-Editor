@@ -2,13 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:53:07
+ * @LastEditTime: 2023-09-07 00:21:38
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
 import { getFileName, stringHash } from '../utils'
 export class TabView {
-    readonly files: string[]
-    readonly ItemList: Map<string, HTMLElement> = new Map()
+    files: string[]
+    ItemList: Map<string, HTMLElement> = new Map()
 
     tabsBody!: HTMLElement
 
@@ -56,6 +56,17 @@ export class TabView {
         return tabItem
     }
 
+    removeItem(path: string) {
+        this.files = this.files.filter(item => item !== path)
+
+        const tabItem = this.ItemList.get(path)
+
+        if (tabItem) {
+            this.tabsBody.removeChild(tabItem)
+        }
+
+    }
+
     createTabItem(path: string) {
         const tabItem = document.createElement("div")
         tabItem.classList.add("filetab_item")
@@ -75,7 +86,7 @@ export class TabView {
 
     // 切换focus项
     focus(path: string) {
-      
+
         const tabItem = this.ItemList.get(path)
         const activeItem = this.tabsBody.querySelector(".focus")
 
@@ -92,5 +103,14 @@ export class TabView {
     // 生成文件ID
     generateId(path: string) {
         return `fileTab_${stringHash(path)}`
+    }
+
+    // 绑定关键事件
+    bindEvents(path: string, { onClick, onClose }: any) {
+        const tabItem = this.ItemList.get(path)
+        const closeButton = tabItem?.querySelector(".close_button")
+
+        tabItem?.addEventListener('click', onClick)
+        closeButton?.addEventListener('click', onClose)
     }
 }

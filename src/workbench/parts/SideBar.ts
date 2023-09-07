@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:31:02
+ * @LastEditTime: 2023-09-07 00:23:06
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
@@ -56,7 +56,7 @@ export class SideBarPart implements ISideBarService, Part {
         this.editorService.loadFileModel(model)
 
         // 添加到tab栏中
-        this.fileTabPart.addFile(model.id)
+        this.fileTabPart.addTabItem(model.id)
     }
 }
 
