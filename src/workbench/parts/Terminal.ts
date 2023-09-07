@@ -2,14 +2,12 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 16:02:37
+ * @LastEditTime: 2023-09-07 11:50:25
  * @Description: 集成终端UI部分
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { IIPCRendererService } from '../services/IPCRendererService'
-import { ISideBarService } from './SideBar'
-import { IEditorService } from './Editor'
 import { AttachAddon } from "xterm-addon-attach";
 import { FitAddon } from 'xterm-addon-fit'
 import { Terminal } from 'xterm';
@@ -21,13 +19,11 @@ export class TerminalPart implements ITerminalPart, Part {
     private _term!: Terminal
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService,
-        @ISideBarService private readonly sideBarService: ISideBarService,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
 
     }
-
+    // 创建
     create(container: HTMLElement): void {
         this._container = container
         this.createTerminal()

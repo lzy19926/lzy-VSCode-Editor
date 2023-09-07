@@ -16,14 +16,11 @@ export class TitleBarPart implements ITitleBarService, Part {
     private _container!: HTMLElement
 
     constructor(
-        @IEditorService private readonly editorService: IEditorService,
         @ISideBarService private readonly sideBarService: ISideBarService,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
+    ) { }
 
-    ) {
-
-    }
-
+    // 创建
     create(container: HTMLElement): void {
         this._container = container
         this.createOpenDirBtn()

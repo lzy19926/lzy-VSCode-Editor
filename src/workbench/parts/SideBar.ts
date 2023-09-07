@@ -2,12 +2,11 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 00:23:06
+ * @LastEditTime: 2023-09-07 11:49:51
  * @Description: 左侧文件资源管理器view模块
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { IIPCRendererService } from '../services/IPCRendererService'
 import { ITextFileService } from '../services/TextFileService'
 import { IFileTabPart } from './FileTab'
 import { IEditorService } from './Editor'
@@ -22,7 +21,6 @@ export class SideBarPart implements ISideBarService, Part {
         @IFileTabPart private readonly fileTabPart: IFileTabPart,
         @IEditorService private readonly editorService: IEditorService,
         @ITextFileService private readonly textFileService: ITextFileService,
-        @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
 
     }
@@ -45,11 +43,12 @@ export class SideBarPart implements ISideBarService, Part {
     // 渲染单个文件
     async event_loadFileContent(e: MouseEvent, node: TreeNode) {
         console.log("--fileInfo--", node);
-        const absolutePath = node.origin?.absolutePath
+
         const isDir = node.origin?.isDir
         if (isDir) return
 
         // 通过文件node获取modal
+        const absolutePath = node.origin?.absolutePath
         const model = await this.textFileService.getFileModel(absolutePath)
 
         // 渲染文件Model
