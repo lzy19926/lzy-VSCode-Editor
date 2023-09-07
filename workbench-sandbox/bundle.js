@@ -165,6 +165,10 @@ class EditorPart {
     getCurrentText() {
         return this._editor.getModel().getValue();
     }
+    // 清空内容
+    clearContent() {
+        this._editor.getModel().setValue("//请打开文件");
+    }
 }
 exports.EditorPart = EditorPart;
 exports.IEditorService = (0, decorator_1.createDecorator)("IEditorService");
@@ -296,7 +300,7 @@ exports.ISideBarService = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:31:02
+ * @LastEditTime: 2023-09-07 00:23:06
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(2);
@@ -342,7 +346,7 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
         // 渲染文件Model
         this.editorService.loadFileModel(model);
         // 添加到tab栏中
-        this.fileTabPart.addFile(model.id);
+        this.fileTabPart.addTabItem(model.id);
     }
 };
 exports.SideBarPart = SideBarPart = __decorate([
@@ -398,7 +402,7 @@ exports.IIPCRendererService = (0, decorator_1.createDecorator)("IIPCRendererServ
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:30:32
+ * @LastEditTime: 2023-09-07 00:12:00
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -447,6 +451,10 @@ let TextFileService = exports.TextFileService = class TextFileService {
             }
         }
     }
+    // 移除文件模型
+    removeFileModel(path) {
+        return this.cacheFileService.remove(path);
+    }
     // 获取文件模型
     async getFileModel(path) {
         let model = this.cacheFileService.get(path);
@@ -459,7 +467,7 @@ let TextFileService = exports.TextFileService = class TextFileService {
         return model;
     }
     // 创建文件模型(创建文件的Uint8Array和text)
-    _createFileModel(id, bufferOrText) {
+    _createFileModel(path, bufferOrText) {
         let text, buffer;
         if (typeof bufferOrText == 'string') {
             text = bufferOrText;
@@ -468,7 +476,7 @@ let TextFileService = exports.TextFileService = class TextFileService {
             buffer = new Uint8Array(bufferOrText);
             text = new TextDecoder().decode(buffer);
         }
-        return { id, text, buffer };
+        return { id: path, text, buffer };
     }
     // 通知文件进程写回文件内容到硬盘
     updateDiskFile(path, content) {
@@ -495,7 +503,7 @@ exports.ITextFileService = (0, decorator_1.createDecorator)("ITextFileService");
  * @Author: Luzy
  * @Date: 2023-08-25 16:56:06
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-04 21:24:29
+ * @LastEditTime: 2023-09-07 00:08:39
  * @Description: 提供文本文件前端缓存功能
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -512,6 +520,9 @@ class CacheFileService {
     }
     has(id) {
         return this._cache.has(id);
+    }
+    remove(id) {
+        return this._cache.delete(id);
     }
     update(id, text) {
         const model = this._cache.get(id);
@@ -536,7 +547,7 @@ exports.ICacheFileService = (0, decorator_1.createDecorator)("ICacheFileService"
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:54:07
+ * @LastEditTime: 2023-09-07 11:47:26
  * @Description: 用于展示文件的tab栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -552,21 +563,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IFileTabPart = exports.FileTabPart = void 0;
 const serviceCollection_1 = __webpack_require__(3);
 const decorator_1 = __webpack_require__(2);
-const CacheFileService_1 = __webpack_require__(7);
 const TextFileService_1 = __webpack_require__(6);
 const Editor_1 = __webpack_require__(1);
 const tabView_1 = __webpack_require__(9);
 let FileTabPart = exports.FileTabPart = class FileTabPart {
     editorService;
-    cacheFileService;
     textFileService;
     _tab;
     fileList = [];
     fileSet = new Set();
     _container;
-    constructor(editorService, cacheFileService, textFileService) {
+    constructor(editorService, textFileService) {
         this.editorService = editorService;
-        this.cacheFileService = cacheFileService;
         this.textFileService = textFileService;
     }
     // 创建
@@ -574,34 +582,80 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
         this._container = container;
         this.renderFileTabs();
     }
-    // 添加文件,并给返回的dom添加加载文件事件
-    addFile(path) {
+    // 添加tabItem,并给返回的dom添加加载文件事件
+    addTabItem(path) {
         if (this._tab && !this.fileSet.has(path)) {
-            const tabItem = this._tab.addFile(path);
-            const wrappedEvent = (e) => {
-                this.event_loadFileContent.call(this, e, path);
-            };
-            tabItem.addEventListener('click', wrappedEvent);
+            this._tab.addFile(path);
+            this._tab.bindEvents(path, {
+                onClick: (e) => {
+                    e.stopPropagation();
+                    this.loadFileContent.call(this, path);
+                },
+                onClose: (e) => {
+                    e.stopPropagation();
+                    this.removeFile.call(this, path);
+                }
+            });
+            this.fileList.push(path);
         }
         this.fileSet.add(path);
+        this._tab.focus(path);
+    }
+    // 移除
+    removeTabItem(path) {
+        this.fileSet.delete(path);
+        this._tab.removeItem(path);
     }
     // 渲染文件tabs
     renderFileTabs() {
-        const tab = new tabView_1.TabView(this.fileList);
+        const tab = new tabView_1.TabView();
         tab.render(this._container);
         this._tab = tab;
     }
-    // 节点事件,加载单个文件
-    async event_loadFileContent(e, path) {
+    // 加载单个文件
+    async loadFileContent(path) {
+        const isCurrentModel = this.editorService.getCurrentModel()?.id == path;
+        if (isCurrentModel)
+            return;
         const model = await this.textFileService.getFileModel(path);
         this.editorService.loadFileModel(model);
         this._tab.focus(path);
     }
+    // 移除单个文件
+    async removeFile(path) {
+        const isCurrentModel = this.editorService.getCurrentModel()?.id == path;
+        if (isCurrentModel) {
+            this._loadPrevFile(path);
+        }
+        this._removeFile(path);
+    }
+    _removeFile(path) {
+        this.textFileService.removeFileModel(path);
+        this.removeTabItem(path);
+        this.fileList = this.fileList.filter(item => item !== path);
+    }
+    _loadPrevFile(path) {
+        const removedIdx = this.fileList.indexOf(path);
+        let prevFileIdx;
+        if (removedIdx == this.fileList.length - 1) {
+            prevFileIdx = removedIdx - 1;
+        }
+        else {
+            prevFileIdx = removedIdx + 1;
+        }
+        if (prevFileIdx == -1) {
+            this.editorService.clearContent();
+            return;
+        }
+        const prevFilePath = this.fileList[prevFileIdx];
+        if (prevFilePath) {
+            this.loadFileContent(prevFilePath);
+        }
+    }
 };
 exports.FileTabPart = FileTabPart = __decorate([
     __param(0, Editor_1.IEditorService),
-    __param(1, CacheFileService_1.ICacheFileService),
-    __param(2, TextFileService_1.ITextFileService)
+    __param(1, TextFileService_1.ITextFileService)
 ], FileTabPart);
 exports.IFileTabPart = (0, decorator_1.createDecorator)("IFileTabPart");
 (0, serviceCollection_1.registerSingleton)(exports.IFileTabPart, FileTabPart);
@@ -619,16 +673,15 @@ exports.TabView = void 0;
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:53:07
+ * @LastEditTime: 2023-09-07 11:12:45
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
 const utils_1 = __webpack_require__(10);
 class TabView {
-    files;
+    files = [];
     ItemList = new Map();
     tabsBody;
-    constructor(files) {
-        this.files = files;
+    constructor() {
         this.tabsBody = this.initTabsBody();
     }
     initTabsBody() {
@@ -662,6 +715,13 @@ class TabView {
         this.focus(path);
         return tabItem;
     }
+    removeItem(path) {
+        this.files = this.files.filter(item => item !== path);
+        const tabItem = this.ItemList.get(path);
+        if (tabItem) {
+            this.tabsBody.removeChild(tabItem);
+        }
+    }
     createTabItem(path) {
         const tabItem = document.createElement("div");
         tabItem.classList.add("filetab_item");
@@ -688,6 +748,13 @@ class TabView {
     // 生成文件ID
     generateId(path) {
         return `fileTab_${(0, utils_1.stringHash)(path)}`;
+    }
+    // 绑定关键事件
+    bindEvents(path, { onClick, onClose }) {
+        const tabItem = this.ItemList.get(path);
+        const closeButton = tabItem?.querySelector(".close_button");
+        tabItem?.addEventListener('click', onClick);
+        closeButton?.addEventListener('click', onClose);
     }
 }
 exports.TabView = TabView;

@@ -2,18 +2,17 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:40:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 00:21:38
+ * @LastEditTime: 2023-09-07 11:12:45
  * @Description: tabs横向列表组件 用于文件展示等功能
  */
 import { getFileName, stringHash } from '../utils'
 export class TabView {
-    files: string[]
+    files: string[] = []
     ItemList: Map<string, HTMLElement> = new Map()
 
     tabsBody!: HTMLElement
 
-    constructor(files: any) {
-        this.files = files;
+    constructor() {
         this.tabsBody = this.initTabsBody()
     }
 

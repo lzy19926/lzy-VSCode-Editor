@@ -2,13 +2,12 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 23:54:07
+ * @LastEditTime: 2023-09-07 11:47:26
  * @Description: 用于展示文件的tab栏
  */
 
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { createDecorator } from '../../common/IOC/decorator'
-import { ICacheFileService } from '../services/CacheFileService'
 import { ITextFileService } from '../services/TextFileService'
 import { IEditorService } from './Editor'
 import { TabView } from '../dom/tabView'
@@ -24,7 +23,6 @@ export class FileTabPart implements IFileTabPart, Part {
 
     constructor(
         @IEditorService private readonly editorService: IEditorService,
-        @ICacheFileService private readonly cacheFileService: ICacheFileService,
         @ITextFileService private readonly textFileService: ITextFileService,
     ) { }
 
@@ -34,42 +32,98 @@ export class FileTabPart implements IFileTabPart, Part {
         this.renderFileTabs()
     }
 
-    // 添加文件,并给返回的dom添加加载文件事件
-    addFile(path: string) {
+    // 添加tabItem,并给返回的dom添加加载文件事件
+    addTabItem(path: string) {
         if (this._tab && !this.fileSet.has(path)) {
 
-            const tabItem = this._tab.addFile(path)
+            this._tab.addFile(path)
 
-            const wrappedEvent = (e: Event) => {
-                this.event_loadFileContent.call(this, e, path)
-            }
+            this._tab.bindEvents(path, {
+                onClick: (e: Event) => {
+                    e.stopPropagation()
+                    this.loadFileContent.call(this, path)
+                },
+                onClose: (e: Event) => {
+                    e.stopPropagation()
+                    this.removeFile.call(this, path)
+                }
+            })
 
-            tabItem.addEventListener('click', wrappedEvent)
+            this.fileList.push(path)
         }
 
         this.fileSet.add(path)
+        this._tab.focus(path)
+    }
+
+    // 移除
+    removeTabItem(path: string) {
+        this.fileSet.delete(path)
+        this._tab.removeItem(path)
     }
 
     // 渲染文件tabs
     renderFileTabs() {
-        const tab = new TabView(this.fileList)
+        const tab = new TabView()
         tab.render(this._container)
         this._tab = tab
     }
 
-    // 节点事件,加载单个文件
-    async event_loadFileContent(e: Event, path: string) {
+    // 加载单个文件
+    async loadFileContent(path: string) {
+        const isCurrentModel = this.editorService.getCurrentModel()?.id == path
+        if (isCurrentModel) return
 
         const model = await this.textFileService.getFileModel(path)
-
         this.editorService.loadFileModel(model)
-
         this._tab.focus(path)
+    }
+
+    // 移除单个文件
+    async removeFile(path: string) {
+
+        const isCurrentModel = this.editorService.getCurrentModel()?.id == path
+
+        if (isCurrentModel) {
+            this._loadPrevFile(path)
+        }
+
+        this._removeFile(path)
+    }
+
+    _removeFile(path: string) {
+        this.textFileService.removeFileModel(path)
+        this.removeTabItem(path)
+
+        this.fileList = this.fileList.filter(item => item !== path)
+    }
+
+    _loadPrevFile(path: string) {
+        const removedIdx = this.fileList.indexOf(path)
+
+        let prevFileIdx
+        if (removedIdx == this.fileList.length - 1) {
+            prevFileIdx = removedIdx - 1
+        } else {
+            prevFileIdx = removedIdx + 1
+        }
+
+        if (prevFileIdx == -1) {
+            this.editorService.clearContent()
+            return
+        }
+
+        const prevFilePath = this.fileList[prevFileIdx]
+
+        if (prevFilePath) {
+            this.loadFileContent(prevFilePath)
+        }
     }
 }
 
 export interface IFileTabPart {
-    addFile(id: string): void
+    addTabItem(id: string): void
+    removeTabItem(path: string): void
 }
 
 export const IFileTabPart = createDecorator<IFileTabPart>("IFileTabPart")

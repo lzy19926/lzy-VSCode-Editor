@@ -1,18 +1,21 @@
+
 /*
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 16:00:23
+ * @LastEditTime: 2023-09-07 11:04:25
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { Part } from './Part'
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import type { TextFileModel } from '../services/TextFileService'
+import type { editor as monaco } from 'monaco-editor'
 
+type MonacoEditor = monaco.ICodeEditor
 
 export class EditorPart implements IEditorService, Part {
-    private _editor: any
+    private _editor!: MonacoEditor
     private _container!: HTMLElement
     private _currentModel?: TextFileModel
 
@@ -75,7 +78,7 @@ export class EditorPart implements IEditorService, Part {
 
     // 编辑器加载文件
     public loadFileModel(model: TextFileModel) {
-        this._editor.getModel().setValue(model.text)
+        this._editor.getModel()!.setValue(model.text)
         this._currentModel = model
         console.log("loadFile model", this._currentModel);
     }
@@ -87,13 +90,19 @@ export class EditorPart implements IEditorService, Part {
 
     // 获取当前文本
     public getCurrentText(): string {
-        return this._editor.getModel().getValue()
+        return this._editor.getModel()!.getValue()
+    }
+
+    // 清空内容
+    public clearContent() {
+        this._editor.getModel()!.setValue("//请打开文件")
     }
 }
 
 export interface IEditorService {
     create(container: HTMLElement): void
     loadFileModel(model: TextFileModel): void
+    clearContent(): void
     getCurrentModel(): TextFileModel | undefined
     getCurrentText(): string
 }
