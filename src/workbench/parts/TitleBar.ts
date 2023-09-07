@@ -2,12 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:23:58
+ * @LastEditTime: 2023-09-07 20:17:22
  * @Description: 顶部导航菜单栏
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { IIPCRendererService } from '../services/IPCRendererService'
+import { ICommandService } from '../command/CommandService'
 import { ISideBarPart } from './SideBar'
 import { Part } from './Part'
 
@@ -16,6 +17,7 @@ export class TitleBarPart implements ITitleBarPart, Part {
 
     constructor(
         @ISideBarPart private readonly sideBarPart: ISideBarPart,
+        @ICommandService private readonly commandService: ICommandService,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) { }
 
@@ -30,7 +32,9 @@ export class TitleBarPart implements ITitleBarPart, Part {
     createOpenDirBtn() {
         const btn = document.createElement("button")
         btn.innerText = "打开文件夹"
-        btn.onclick = this.event_loadFiletreeFromDir.bind(this)
+        btn.onclick = (e: Event) => {
+            this.commandService.executeCommand("workbench.action.pickFolderAndOpen")
+        }
         this._container.appendChild(btn)
     }
 
@@ -40,13 +44,6 @@ export class TitleBarPart implements ITitleBarPart, Part {
         btn.innerText = "打开文件"
         btn.onclick = this.event_loadFileContent.bind(this)
         this._container.appendChild(btn)
-    }
-
-    // 按钮事件 获取并加载文件树
-    async event_loadFiletreeFromDir(event: Event) {
-        const res = await this.ipcRendererService.invokeAPI("getFileTreeFromDir")
-        const fileTree = res
-        this.sideBarPart.renderFileList(fileTree)
     }
 
     //todo 需要重写 按钮事件 加载单个文件

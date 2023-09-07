@@ -12,6 +12,7 @@ import { IEditorPart } from "../parts/Editor";
 import { IFileTabPart } from "../parts/FileTab";
 import { ITextFileService } from "../services/TextFileService"
 import { ServiceIdentifier } from "../../common/IOC/decorator"
+import { IIPCRendererService } from "../services/IPCRendererService";
 import { InstantiationService } from "../../common/IOC/InstantiationService";
 import { SyncDescriptor, getGlobalCollection } from "../../common/IOC/serviceCollection";
 
@@ -24,11 +25,13 @@ class BroswerServiceAccessor {
     constructor(
         @IEditorPart private readonly editorPart: IEditorPart,
         @IFileTabPart private readonly fileTabPart: IFileTabPart,
+        @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
         @ITextFileService private readonly textFileService: ITextFileService,
     ) {
         this._services.set(IEditorPart, editorPart)
         this._services.set(IFileTabPart, fileTabPart)
         this._services.set(ITextFileService, textFileService)
+        this._services.set(IIPCRendererService, ipcRendererService)
     }
 
     get<T>(id: ServiceIdentifier<T>): T {

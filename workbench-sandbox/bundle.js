@@ -25,13 +25,13 @@ exports.Workbench = exports.Parts = void 0;
  */
 __webpack_require__(1);
 const Editor_1 = __webpack_require__(2);
-const SideBar_1 = __webpack_require__(15);
+const SideBar_1 = __webpack_require__(13);
 const TitleBar_1 = __webpack_require__(17);
 const Terminal_1 = __webpack_require__(18);
 const FileTab_1 = __webpack_require__(5);
 const BroswerEventsService_1 = __webpack_require__(22);
 const serviceCollection_1 = __webpack_require__(4);
-const InstantiationService_1 = __webpack_require__(14);
+const InstantiationService_1 = __webpack_require__(16);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -102,19 +102,23 @@ main();
  * @Author: Luzy
  * @Date: 2023-09-07 19:01:53
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:40:57
+ * @LastEditTime: 2023-09-07 20:15:48
  * @Description: 这里定义了所有通过界面发出的命令 如打开文件等
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const Editor_1 = __webpack_require__(2);
 const FileTab_1 = __webpack_require__(5);
+const SideBar_1 = __webpack_require__(13);
 const TextFileService_1 = __webpack_require__(6);
+const IPCRendererService_1 = __webpack_require__(8);
 const CommandsRegistry_1 = __webpack_require__(10);
-const BroswerServiceAccessor_1 = __webpack_require__(13);
+const BroswerServiceAccessor_1 = __webpack_require__(15);
 // Services
 const editorService = BroswerServiceAccessor_1.accessor.get(Editor_1.IEditorPart);
 const textFileService = BroswerServiceAccessor_1.accessor.get(TextFileService_1.ITextFileService);
 const fileTabPart = BroswerServiceAccessor_1.accessor.get(FileTab_1.IFileTabPart);
+const sideBarPart = BroswerServiceAccessor_1.accessor.get(SideBar_1.ISideBarPart);
+const ipcRendererService = BroswerServiceAccessor_1.accessor.get(IPCRendererService_1.IIPCRendererService);
 // 读取单个文件内容
 async function loadFileContent(path) {
     const isCurrentModel = editorService.getCurrentModel()?.id == path;
@@ -122,11 +126,21 @@ async function loadFileContent(path) {
         return;
     const model = await textFileService.getFileModel(path);
     editorService.loadFileModel(model);
-    fileTabPart.focus(path);
+    fileTabPart.addOrFocuseTabItem(model.id);
+}
+// 按钮事件 获取并加载文件树
+async function pickFolderAndOpen(event) {
+    const res = await ipcRendererService.invokeAPI("getFileTreeFromDir");
+    const fileTree = res;
+    sideBarPart.renderFileList(fileTree);
 }
 CommandsRegistry_1.CommandsRegistry.registerCommand({
     id: 'workbench.action.loadFileContent',
     handler: loadFileContent
+});
+CommandsRegistry_1.CommandsRegistry.registerCommand({
+    id: 'workbench.action.pickFolderAndOpen',
+    handler: pickFolderAndOpen
 });
 
 
@@ -328,7 +342,7 @@ exports.getGlobalCollection = getGlobalCollection;
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 20:03:19
+ * @LastEditTime: 2023-09-07 20:12:32
  * @Description: 用于展示文件的tab栏
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -367,7 +381,7 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
         this.renderFileTabs();
     }
     // 添加tabItem,并给返回的dom添加加载文件事件
-    addTabItem(path) {
+    addOrFocuseTabItem(path) {
         if (this._tab && !this.fileSet.has(path)) {
             this._tab.addFile(path);
             this._tab.bindEvents(path, {
@@ -823,191 +837,6 @@ exports.stringHash = stringHash;
 
 "use strict";
 
-/*
- * @Author: Luzy
- * @Date: 2023-08-26 14:22:25
- * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:20:45
- * @Description: 通过该类确保直接获取创建API所需的service实例
- * 通过serviceCollection获取的可能是描述器而不是实例
- */
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.accessor = void 0;
-const Editor_1 = __webpack_require__(2);
-const FileTab_1 = __webpack_require__(5);
-const TextFileService_1 = __webpack_require__(6);
-const InstantiationService_1 = __webpack_require__(14);
-const serviceCollection_1 = __webpack_require__(4);
-let BroswerServiceAccessor = class BroswerServiceAccessor {
-    editorPart;
-    fileTabPart;
-    textFileService;
-    _services = new Map();
-    // 注入API所需的服务实例储存起来
-    constructor(editorPart, fileTabPart, textFileService) {
-        this.editorPart = editorPart;
-        this.fileTabPart = fileTabPart;
-        this.textFileService = textFileService;
-        this._services.set(Editor_1.IEditorPart, editorPart);
-        this._services.set(FileTab_1.IFileTabPart, fileTabPart);
-        this._services.set(TextFileService_1.ITextFileService, textFileService);
-    }
-    get(id) {
-        const instance = this._services.get(id);
-        if (!instance) {
-            console.error(`Service ${id.toString()} should be injected in Accessor`);
-        }
-        return instance;
-    }
-};
-BroswerServiceAccessor = __decorate([
-    __param(0, Editor_1.IEditorPart),
-    __param(1, FileTab_1.IFileTabPart),
-    __param(2, TextFileService_1.ITextFileService)
-], BroswerServiceAccessor);
-const instanService = new InstantiationService_1.InstantiationService((0, serviceCollection_1.getGlobalCollection)());
-exports.accessor = instanService.createInstance(new serviceCollection_1.SyncDescriptor(BroswerServiceAccessor));
-
-
-/***/ }),
-/* 14 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-/*
- * @Author: Luzy
- * @Date: 2023-08-20 15:32:08
- * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 01:00:39
- * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
- */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IInstantiationService = exports.InstantiationService = void 0;
-const serviceCollection_1 = __webpack_require__(4);
-const decorator_1 = __webpack_require__(3);
-// 检查是实例还是描述符
-function checkDescOrInstance(descOrInstance) {
-    const isDesc = (descOrInstance instanceof serviceCollection_1.SyncDescriptor);
-    if (isDesc) {
-        return "desc";
-    }
-    else if (typeof descOrInstance !== 'undefined' && !isDesc) {
-        return "instance";
-    }
-    else {
-        return "unknow";
-    }
-}
-// 实例化服务, 用于将单个服务进行实例化,并提供注入依赖逻辑
-class InstantiationService {
-    _services;
-    constructor(_services) {
-        this._services = _services;
-    }
-    // 创建实例
-    createInstance(descOrInstance) {
-        if (checkDescOrInstance(descOrInstance) == 'instance') {
-            return descOrInstance;
-        }
-        else {
-            return this._createInstance(descOrInstance);
-        }
-    }
-    _createInstance(descriptor) {
-        const ctor = descriptor.ctor; // 构造函数
-        const staticArgs = descriptor.staticArguments; // 静态参数
-        const serviceArgs = []; // 注入的Services
-        // 将装饰器注入的服务取出并进行实例化
-        // 装饰器保存依赖描述符到数组中
-        const serviceDependencies = ctor["id$dependences"] || [];
-        for (const dependency of serviceDependencies) {
-            const service = this.getOrCreateServiceInstance(dependency);
-            // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
-            serviceArgs.unshift(service);
-        }
-        // 真实创建实例
-        return new ctor(...[...staticArgs, ...serviceArgs]);
-    }
-    // 通过id获取实例或者描述符
-    getServiceInstanceOrDescriptor(id) {
-        return this._services.get(id);
-    }
-    // 如果是描述器就创建一个实例  否则直接返回实例
-    getOrCreateServiceInstance(dependency) {
-        const thing = this.getServiceInstanceOrDescriptor(dependency.id);
-        if (thing instanceof serviceCollection_1.SyncDescriptor) {
-            return this.createAndCacheServiceInstance(dependency);
-        }
-        return thing;
-    }
-    // 通过服务的唯一标识符 实例化被依赖的服务
-    // DFS遍历所有的服务并实例化保存到collection上  最后返回服务实例
-    createAndCacheServiceInstance(dependency) {
-        // 实例或描述符判断  
-        const descOrInstance = this._services.get(dependency.id);
-        if (checkDescOrInstance(descOrInstance) == "instance") {
-            return descOrInstance;
-        }
-        // 构造第一个节点
-        const firstNode = this.createStackNode(dependency);
-        // DFS遍历service的依赖  实例化子依赖
-        // todo 在DFS的时候构建依赖图 这里直接使用数组代替(只实现了部分功能) 来进行实例化
-        const stack = [firstNode];
-        const graph = [firstNode];
-        let cycleCount = 0;
-        while (stack.length) {
-            const item = stack.pop();
-            // 通过记录while循环次数判断是否有循环依赖
-            if (cycleCount++ > 1000) {
-                throw new Error("侦测到循环依赖");
-            }
-            //todo (有可能这里已经是实例了 不是Desc  故无法获取id$dependences)
-            if (checkDescOrInstance(item.desc) !== 'desc')
-                break;
-            // 继续获取子依赖
-            const serviceDependencies = item.desc.ctor["id$dependences"] || [];
-            for (const dependency of serviceDependencies) {
-                // 实例化子服务
-                const node = this.createStackNode(dependency);
-                this.createAndCacheServiceInstance(dependency);
-                graph.push(node);
-                stack.push(node);
-            }
-        }
-        // 实例化当前service并保存
-        const { id, desc } = firstNode;
-        const serviceInstance = this.createInstance(desc);
-        this._services.set(id, serviceInstance);
-        return serviceInstance;
-    }
-    // 创建栈节点 用于进行BFS
-    createStackNode(dependency) {
-        const id = dependency.id;
-        const desc = this.getServiceInstanceOrDescriptor(id);
-        const name = dependency.name;
-        return { name, id, desc };
-    }
-}
-exports.InstantiationService = InstantiationService;
-exports.IInstantiationService = (0, decorator_1.createDecorator)("IInstantiationService");
-
-
-/***/ }),
-/* 15 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1023,24 +852,18 @@ exports.ISideBarPart = exports.SideBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:25:44
+ * @LastEditTime: 2023-09-07 20:09:35
  * @Description: 左侧文件资源管理器view模块
  */
 const decorator_1 = __webpack_require__(3);
 const serviceCollection_1 = __webpack_require__(4);
-const TextFileService_1 = __webpack_require__(6);
-const FileTab_1 = __webpack_require__(5);
-const Editor_1 = __webpack_require__(2);
-const treeView_1 = __webpack_require__(16);
+const CommandService_1 = __webpack_require__(9);
+const treeView_1 = __webpack_require__(14);
 let SideBarPart = exports.SideBarPart = class SideBarPart {
-    fileTabPart;
-    editorPart;
-    textFileService;
+    commandService;
     _container;
-    constructor(fileTabPart, editorPart, textFileService) {
-        this.fileTabPart = fileTabPart;
-        this.editorPart = editorPart;
-        this.textFileService = textFileService;
+    constructor(commandService) {
+        this.commandService = commandService;
     }
     // 创建SideBar本体
     create(container) {
@@ -1049,37 +872,29 @@ let SideBarPart = exports.SideBarPart = class SideBarPart {
     // 渲染文件列表 给列表节点指定事件
     renderFileList(fileTree) {
         let tree = new treeView_1.TreeListView([fileTree]);
+        const wrappedEvent = (e, node) => {
+            console.log("--fileInfo--", node);
+            const isDir = node.origin?.isDir;
+            if (isDir)
+                return;
+            const absolutePath = node.origin?.absolutePath;
+            this.commandService.executeCommand("workbench.action.loadFileContent", absolutePath);
+        };
         tree.bindEvents([
-            { eventName: "click", callback: this.event_loadFileContent.bind(this) }
+            { eventName: "click", callback: wrappedEvent.bind(this) }
         ]);
         tree.render(this._container);
     }
-    // 渲染单个文件
-    async event_loadFileContent(e, node) {
-        console.log("--fileInfo--", node);
-        const isDir = node.origin?.isDir;
-        if (isDir)
-            return;
-        // 通过文件node获取modal
-        const absolutePath = node.origin?.absolutePath;
-        const model = await this.textFileService.getFileModel(absolutePath);
-        // 渲染文件Model
-        this.editorPart.loadFileModel(model);
-        // 添加到tab栏中
-        this.fileTabPart.addTabItem(model.id);
-    }
 };
 exports.SideBarPart = SideBarPart = __decorate([
-    __param(0, FileTab_1.IFileTabPart),
-    __param(1, Editor_1.IEditorPart),
-    __param(2, TextFileService_1.ITextFileService)
+    __param(0, CommandService_1.ICommandService)
 ], SideBarPart);
 exports.ISideBarPart = (0, decorator_1.createDecorator)("ISideBarPart");
 (0, serviceCollection_1.registerSingleton)(exports.ISideBarPart, SideBarPart);
 
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1242,6 +1057,196 @@ function findParentId(el) {
 
 
 /***/ }),
+/* 15 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-26 14:22:25
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-07 19:20:45
+ * @Description: 通过该类确保直接获取创建API所需的service实例
+ * 通过serviceCollection获取的可能是描述器而不是实例
+ */
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.accessor = void 0;
+const Editor_1 = __webpack_require__(2);
+const FileTab_1 = __webpack_require__(5);
+const TextFileService_1 = __webpack_require__(6);
+const IPCRendererService_1 = __webpack_require__(8);
+const InstantiationService_1 = __webpack_require__(16);
+const serviceCollection_1 = __webpack_require__(4);
+let BroswerServiceAccessor = class BroswerServiceAccessor {
+    editorPart;
+    fileTabPart;
+    ipcRendererService;
+    textFileService;
+    _services = new Map();
+    // 注入API所需的服务实例储存起来
+    constructor(editorPart, fileTabPart, ipcRendererService, textFileService) {
+        this.editorPart = editorPart;
+        this.fileTabPart = fileTabPart;
+        this.ipcRendererService = ipcRendererService;
+        this.textFileService = textFileService;
+        this._services.set(Editor_1.IEditorPart, editorPart);
+        this._services.set(FileTab_1.IFileTabPart, fileTabPart);
+        this._services.set(TextFileService_1.ITextFileService, textFileService);
+        this._services.set(IPCRendererService_1.IIPCRendererService, ipcRendererService);
+    }
+    get(id) {
+        const instance = this._services.get(id);
+        if (!instance) {
+            console.error(`Service ${id.toString()} should be injected in Accessor`);
+        }
+        return instance;
+    }
+};
+BroswerServiceAccessor = __decorate([
+    __param(0, Editor_1.IEditorPart),
+    __param(1, FileTab_1.IFileTabPart),
+    __param(2, IPCRendererService_1.IIPCRendererService),
+    __param(3, TextFileService_1.ITextFileService)
+], BroswerServiceAccessor);
+const instanService = new InstantiationService_1.InstantiationService((0, serviceCollection_1.getGlobalCollection)());
+exports.accessor = instanService.createInstance(new serviceCollection_1.SyncDescriptor(BroswerServiceAccessor));
+
+
+/***/ }),
+/* 16 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-08-20 15:32:08
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-08-26 01:00:39
+ * @Description: 提供注入依赖逻辑并实例化的服务,使用该服务实例化其他服务
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IInstantiationService = exports.InstantiationService = void 0;
+const serviceCollection_1 = __webpack_require__(4);
+const decorator_1 = __webpack_require__(3);
+// 检查是实例还是描述符
+function checkDescOrInstance(descOrInstance) {
+    const isDesc = (descOrInstance instanceof serviceCollection_1.SyncDescriptor);
+    if (isDesc) {
+        return "desc";
+    }
+    else if (typeof descOrInstance !== 'undefined' && !isDesc) {
+        return "instance";
+    }
+    else {
+        return "unknow";
+    }
+}
+// 实例化服务, 用于将单个服务进行实例化,并提供注入依赖逻辑
+class InstantiationService {
+    _services;
+    constructor(_services) {
+        this._services = _services;
+    }
+    // 创建实例
+    createInstance(descOrInstance) {
+        if (checkDescOrInstance(descOrInstance) == 'instance') {
+            return descOrInstance;
+        }
+        else {
+            return this._createInstance(descOrInstance);
+        }
+    }
+    _createInstance(descriptor) {
+        const ctor = descriptor.ctor; // 构造函数
+        const staticArgs = descriptor.staticArguments; // 静态参数
+        const serviceArgs = []; // 注入的Services
+        // 将装饰器注入的服务取出并进行实例化
+        // 装饰器保存依赖描述符到数组中
+        const serviceDependencies = ctor["id$dependences"] || [];
+        for (const dependency of serviceDependencies) {
+            const service = this.getOrCreateServiceInstance(dependency);
+            // 注意这里的构建顺序是反的  需要unshift 否则参数顺序会反
+            serviceArgs.unshift(service);
+        }
+        // 真实创建实例
+        return new ctor(...[...staticArgs, ...serviceArgs]);
+    }
+    // 通过id获取实例或者描述符
+    getServiceInstanceOrDescriptor(id) {
+        return this._services.get(id);
+    }
+    // 如果是描述器就创建一个实例  否则直接返回实例
+    getOrCreateServiceInstance(dependency) {
+        const thing = this.getServiceInstanceOrDescriptor(dependency.id);
+        if (thing instanceof serviceCollection_1.SyncDescriptor) {
+            return this.createAndCacheServiceInstance(dependency);
+        }
+        return thing;
+    }
+    // 通过服务的唯一标识符 实例化被依赖的服务
+    // DFS遍历所有的服务并实例化保存到collection上  最后返回服务实例
+    createAndCacheServiceInstance(dependency) {
+        // 实例或描述符判断  
+        const descOrInstance = this._services.get(dependency.id);
+        if (checkDescOrInstance(descOrInstance) == "instance") {
+            return descOrInstance;
+        }
+        // 构造第一个节点
+        const firstNode = this.createStackNode(dependency);
+        // DFS遍历service的依赖  实例化子依赖
+        // todo 在DFS的时候构建依赖图 这里直接使用数组代替(只实现了部分功能) 来进行实例化
+        const stack = [firstNode];
+        const graph = [firstNode];
+        let cycleCount = 0;
+        while (stack.length) {
+            const item = stack.pop();
+            // 通过记录while循环次数判断是否有循环依赖
+            if (cycleCount++ > 1000) {
+                throw new Error("侦测到循环依赖");
+            }
+            //todo (有可能这里已经是实例了 不是Desc  故无法获取id$dependences)
+            if (checkDescOrInstance(item.desc) !== 'desc')
+                break;
+            // 继续获取子依赖
+            const serviceDependencies = item.desc.ctor["id$dependences"] || [];
+            for (const dependency of serviceDependencies) {
+                // 实例化子服务
+                const node = this.createStackNode(dependency);
+                this.createAndCacheServiceInstance(dependency);
+                graph.push(node);
+                stack.push(node);
+            }
+        }
+        // 实例化当前service并保存
+        const { id, desc } = firstNode;
+        const serviceInstance = this.createInstance(desc);
+        this._services.set(id, serviceInstance);
+        return serviceInstance;
+    }
+    // 创建栈节点 用于进行BFS
+    createStackNode(dependency) {
+        const id = dependency.id;
+        const desc = this.getServiceInstanceOrDescriptor(id);
+        const name = dependency.name;
+        return { name, id, desc };
+    }
+}
+exports.InstantiationService = InstantiationService;
+exports.IInstantiationService = (0, decorator_1.createDecorator)("IInstantiationService");
+
+
+/***/ }),
 /* 17 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1262,19 +1267,22 @@ exports.ITitleBarPart = exports.TitleBarPart = void 0;
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:23:58
+ * @LastEditTime: 2023-09-07 20:17:22
  * @Description: 顶部导航菜单栏
  */
 const decorator_1 = __webpack_require__(3);
 const serviceCollection_1 = __webpack_require__(4);
 const IPCRendererService_1 = __webpack_require__(8);
-const SideBar_1 = __webpack_require__(15);
+const CommandService_1 = __webpack_require__(9);
+const SideBar_1 = __webpack_require__(13);
 let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     sideBarPart;
+    commandService;
     ipcRendererService;
     _container;
-    constructor(sideBarPart, ipcRendererService) {
+    constructor(sideBarPart, commandService, ipcRendererService) {
         this.sideBarPart = sideBarPart;
+        this.commandService = commandService;
         this.ipcRendererService = ipcRendererService;
     }
     // 创建
@@ -1287,7 +1295,9 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
     createOpenDirBtn() {
         const btn = document.createElement("button");
         btn.innerText = "打开文件夹";
-        btn.onclick = this.event_loadFiletreeFromDir.bind(this);
+        btn.onclick = (e) => {
+            this.commandService.executeCommand("workbench.action.pickFolderAndOpen");
+        };
         this._container.appendChild(btn);
     }
     // 打开文件按钮
@@ -1296,12 +1306,6 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
         btn.innerText = "打开文件";
         btn.onclick = this.event_loadFileContent.bind(this);
         this._container.appendChild(btn);
-    }
-    // 按钮事件 获取并加载文件树
-    async event_loadFiletreeFromDir(event) {
-        const res = await this.ipcRendererService.invokeAPI("getFileTreeFromDir");
-        const fileTree = res;
-        this.sideBarPart.renderFileList(fileTree);
     }
     //todo 需要重写 按钮事件 加载单个文件
     async event_loadFileContent(event) {
@@ -1323,7 +1327,8 @@ let TitleBarPart = exports.TitleBarPart = class TitleBarPart {
 };
 exports.TitleBarPart = TitleBarPart = __decorate([
     __param(0, SideBar_1.ISideBarPart),
-    __param(1, IPCRendererService_1.IIPCRendererService)
+    __param(1, CommandService_1.ICommandService),
+    __param(2, IPCRendererService_1.IIPCRendererService)
 ], TitleBarPart);
 exports.ITitleBarPart = (0, decorator_1.createDecorator)("ITitleBarPart");
 (0, serviceCollection_1.registerSingleton)(exports.ITitleBarPart, TitleBarPart);

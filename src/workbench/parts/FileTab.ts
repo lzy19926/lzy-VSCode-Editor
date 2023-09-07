@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-09-03 17:37:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 20:03:19
+ * @LastEditTime: 2023-09-07 20:12:32
  * @Description: 用于展示文件的tab栏
  */
 
@@ -35,7 +35,7 @@ export class FileTabPart implements IFileTabPart, Part {
     }
 
     // 添加tabItem,并给返回的dom添加加载文件事件
-    addTabItem(path: string) {
+    addOrFocuseTabItem(path: string) {
         if (this._tab && !this.fileSet.has(path)) {
 
             this._tab.addFile(path)
@@ -119,7 +119,7 @@ export class FileTabPart implements IFileTabPart, Part {
 
 export interface IFileTabPart {
     focus(path: string): void
-    addTabItem(id: string): void
+    addOrFocuseTabItem(id: string): void
     removeTabItem(path: string): void
 }
 
