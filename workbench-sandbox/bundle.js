@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 20:01:27
+ * @LastEditTime: 2023-09-08 10:58:18
  * @Description: 运行于浏览器端的编辑器主模块
  */
 __webpack_require__(1);
@@ -32,6 +32,8 @@ const FileTab_1 = __webpack_require__(5);
 const BroswerEventsService_1 = __webpack_require__(22);
 const serviceCollection_1 = __webpack_require__(4);
 const InstantiationService_1 = __webpack_require__(16);
+const import_1 = __webpack_require__(23);
+(0, import_1.dynamicImportStyle)();
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -680,7 +682,7 @@ exports.ICommandService = (0, decorator_1.createDecorator)("ICommandService");
  * @Author: Luzy
  * @Date: 2023-09-07 19:41:39
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:41:43
+ * @LastEditTime: 2023-09-07 20:43:26
  * @Description: 全局Command注册器单例
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -1066,7 +1068,7 @@ function findParentId(el) {
  * @Author: Luzy
  * @Date: 2023-08-26 14:22:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:20:45
+ * @LastEditTime: 2023-09-07 20:59:57
  * @Description: 通过该类确保直接获取创建API所需的service实例
  * 通过serviceCollection获取的可能是描述器而不是实例
  */
@@ -1083,23 +1085,27 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.accessor = void 0;
 const Editor_1 = __webpack_require__(2);
 const FileTab_1 = __webpack_require__(5);
+const SideBar_1 = __webpack_require__(13);
 const TextFileService_1 = __webpack_require__(6);
 const IPCRendererService_1 = __webpack_require__(8);
 const InstantiationService_1 = __webpack_require__(16);
 const serviceCollection_1 = __webpack_require__(4);
 let BroswerServiceAccessor = class BroswerServiceAccessor {
     editorPart;
+    sideBarPart;
     fileTabPart;
     ipcRendererService;
     textFileService;
     _services = new Map();
     // 注入API所需的服务实例储存起来
-    constructor(editorPart, fileTabPart, ipcRendererService, textFileService) {
+    constructor(editorPart, sideBarPart, fileTabPart, ipcRendererService, textFileService) {
         this.editorPart = editorPart;
+        this.sideBarPart = sideBarPart;
         this.fileTabPart = fileTabPart;
         this.ipcRendererService = ipcRendererService;
         this.textFileService = textFileService;
         this._services.set(Editor_1.IEditorPart, editorPart);
+        this._services.set(SideBar_1.ISideBarPart, sideBarPart);
         this._services.set(FileTab_1.IFileTabPart, fileTabPart);
         this._services.set(TextFileService_1.ITextFileService, textFileService);
         this._services.set(IPCRendererService_1.IIPCRendererService, ipcRendererService);
@@ -1114,9 +1120,10 @@ let BroswerServiceAccessor = class BroswerServiceAccessor {
 };
 BroswerServiceAccessor = __decorate([
     __param(0, Editor_1.IEditorPart),
-    __param(1, FileTab_1.IFileTabPart),
-    __param(2, IPCRendererService_1.IIPCRendererService),
-    __param(3, TextFileService_1.ITextFileService)
+    __param(1, SideBar_1.ISideBarPart),
+    __param(2, FileTab_1.IFileTabPart),
+    __param(3, IPCRendererService_1.IIPCRendererService),
+    __param(4, TextFileService_1.ITextFileService)
 ], BroswerServiceAccessor);
 const instanService = new InstantiationService_1.InstantiationService((0, serviceCollection_1.getGlobalCollection)());
 exports.accessor = instanService.createInstance(new serviceCollection_1.SyncDescriptor(BroswerServiceAccessor));
@@ -1501,6 +1508,121 @@ exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEvents
 (0, serviceCollection_1.registerSingleton)(exports.IBroswerEventsService, BroswerEventsService);
 
 
+/***/ }),
+/* 23 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+ * @Author: Luzy
+ * @Date: 2023-09-08 10:53:27
+ * @LastEditors: Luzy
+ * @LastEditTime: 2023-09-08 10:59:16
+ * @Description: 统一对CSS进行引入(可换成更好的方式?)
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.dynamicImportStyle = void 0;
+// import './global.css'
+// import './editor.css'
+// import './fileTab.css'
+// import './sideBar.css'
+// import './terminal.css'
+// import './titleBar.css'
+const dynamicImportStyle = () => {
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 24)));
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 25)));
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 26)));
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 27)));
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 28)));
+    /**@ts-ignore*/
+    Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 29)));
+};
+exports.dynamicImportStyle = dynamicImportStyle;
+
+
+/***/ }),
+/* 24 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+/* 25 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+/* 26 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+/* 27 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+/* 28 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+/* 29 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -1527,6 +1649,18 @@ exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEvents
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
 /******/ 	
 /************************************************************************/
 /******/ 	

@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-30 09:49:47
+ * @LastEditTime: 2023-09-07 21:03:32
  * @Description: 提供terminal相关服务  node-pty创建虚拟终端  通过WS与前端xtrem同步IO
  */
 import * as os from 'os'
@@ -59,6 +59,7 @@ export class TerminalService {
     // 创建一个新的伪终端进程并将其附加到当前会话中
     createTerminal() {
         const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
+        process.env.DEBUG = 'node-pty'
         const term = pty.spawn(shell, [], {
             name: 'xterm-color',
             cols: 80,

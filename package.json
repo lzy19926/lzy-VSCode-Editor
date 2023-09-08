@@ -41,7 +41,10 @@
     "@electron-forge/maker-squirrel": "^6.0.5",
     "@electron-forge/maker-zip": "^6.0.5",
     "@types/ws": "^8.5.5",
+    "css-loader": "^6.8.1",
     "electron": "^23.0.0",
+    "mini-css-extract-plugin": "^2.7.6",
+    "style-loader": "^3.3.3",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "ws": "^8.13.0"

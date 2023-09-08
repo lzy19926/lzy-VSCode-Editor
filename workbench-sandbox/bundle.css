@@ -1,13 +1,3 @@
-/*
- * @Author: Luzy
- * @Date: 2023-08-22 17:47:37
- * @LastEditors: Luzy
- * @LastEditTime: 2023-09-06 18:23:08
- * @Description: 
- */
-
-/* ! 现在所有的css先写在这里  之后需要拆分 */
-
 /* ! --------- 全局标准样式  */
 body {
     margin: 0;
@@ -15,7 +5,6 @@ body {
     box-sizing: border-box;
     background-color: #ccc;
 }
-
 /* ! --------- 编辑器容器样式  */
 .editor {
     height: 100%;
@@ -25,100 +14,6 @@ body {
     top: 63px;
     background-color: black;
 }
-
-/* ! --------- 顶部菜单栏样式  */
-.titleBar {
-    height: 35px;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: brown;
-    border-bottom: solid 3px #ccc;
-}
-
-
-
-/* ! --------- 终端样式  */
-
-.terminal_part {
-    height: 20%;
-    width: 85%;
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    background-color: black;
-    border-top: solid 3px #ccc;
-}
-
-/* 给终端额外定制滚动条 */
-.xterm-viewport {
-    padding-left: 2px;
-}
-
-.xterm-screen {
-    padding-left: 4px;
-    padding-top: 2px;
-}
-
-.xterm-viewport::-webkit-scrollbar {
-    width: 8px;
-}
-
-.xterm-viewport::-webkit-scrollbar-thumb {
-    background-color: rgba(204, 204, 204, 0.3);
-}
-
-/* ! --------- 左侧菜单栏样式  */
-
-.sideBar {
-    height: 100%;
-    width: 15%;
-    position: fixed;
-    left: -3px;
-    top: 37px;
-    background-color: rgb(206, 100, 7);
-    border-right: solid 5px #ccc;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    z-index: -999;
-}
-
-.sideBar::-webkit-scrollbar {
-    width: 8px;
-}
-
-.sideBar::-webkit-scrollbar-thumb {
-    background-color: rgba(204, 204, 204, 0.3);
-}
-
-.hidden {
-    display: none;
-}
-
-.focus {
-    background-color: rgba(204, 204, 204, 0.3);
-}
-
-ul {
-    padding: 5px;
-}
-
-.tree_view_node {
-    white-space: nowrap;
-}
-
-.node__content {
-    padding: 2px 0px 2px 5px;
-    font-size: 12px;
-}
-
-.node__content:hover {
-    cursor: pointer;
-    background-color: rgba(204, 204, 204, 0.3);
-}
-
-
 /* ! --------- 打开的文件tab栏样式  */
 
 .filetab_part {
@@ -181,3 +76,91 @@ ul {
     background-color: #3d3d3d;
     border-radius: 2px;
 }
+/* ! --------- 左侧菜单栏样式  */
+
+.sideBar {
+    height: 100%;
+    width: 15%;
+    position: fixed;
+    left: -3px;
+    top: 37px;
+    background-color: rgb(206, 100, 7);
+    border-right: solid 5px #ccc;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    z-index: -999;
+}
+
+.sideBar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sideBar::-webkit-scrollbar-thumb {
+    background-color: rgba(204, 204, 204, 0.3);
+}
+
+.hidden {
+    display: none;
+}
+
+.focus {
+    background-color: rgba(204, 204, 204, 0.3);
+}
+
+ul {
+    padding: 5px;
+}
+
+.tree_view_node {
+    white-space: nowrap;
+}
+
+.node__content {
+    padding: 2px 0px 2px 5px;
+    font-size: 12px;
+}
+
+.node__content:hover {
+    cursor: pointer;
+    background-color: rgba(204, 204, 204, 0.3);
+}
+/* ! --------- 终端样式  */
+
+.terminal_part {
+    height: 20%;
+    width: 85%;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    border-top: solid 3px #ccc;
+}
+
+/* 给终端额外定制滚动条 */
+.xterm-viewport {
+    padding-left: 2px;
+}
+
+.xterm-screen {
+    padding-left: 4px;
+    padding-top: 2px;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+    width: 8px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+    background-color: rgba(204, 204, 204, 0.3);
+}
+/* ! --------- 顶部菜单栏样式  */
+.titleBar {
+    height: 35px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: brown;
+    border-bottom: solid 3px #ccc;
+}
+

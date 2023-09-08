@@ -1,0 +1,29 @@
+/* ! --------- 终端样式  */
+
+.terminal_part {
+    height: 20%;
+    width: 85%;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    border-top: solid 3px #ccc;
+}
+
+/* 给终端额外定制滚动条 */
+.xterm-viewport {
+    padding-left: 2px;
+}
+
+.xterm-screen {
+    padding-left: 4px;
+    padding-top: 2px;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+    width: 8px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+    background-color: rgba(204, 204, 204, 0.3);
+}

@@ -1,0 +1,10 @@
+/* ! --------- 顶部菜单栏样式  */
+.titleBar {
+    height: 35px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: brown;
+    border-bottom: solid 3px #ccc;
+}

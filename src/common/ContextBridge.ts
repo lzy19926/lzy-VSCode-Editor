@@ -3,7 +3,7 @@
  * @Date: 2023-08-26 16:33:18
  * @LastEditors: Luzy
  * @LastEditTime: 2023-08-26 16:33:42
- * @Description: 用于在打开窗口的preload中 注入相关API到沙箱理
+ * @Description: 用于在打开窗口的preload中 注入相关API到workbench沙箱
  */
 
 

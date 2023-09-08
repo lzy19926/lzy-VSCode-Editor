@@ -1,0 +1,9 @@
+/* ! --------- 编辑器容器样式  */
+.editor {
+    height: 100%;
+    width: 85%;
+    position: fixed;
+    right: 0;
+    top: 63px;
+    background-color: black;
+}

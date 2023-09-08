@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 20:01:27
+ * @LastEditTime: 2023-09-08 11:00:35
  * @Description: 运行于浏览器端的编辑器主模块
  */
 import './command/commands'
@@ -14,6 +14,7 @@ import { IFileTabPart } from './parts/FileTab'
 import { IBroswerEventsService } from './services/BroswerEventsService'
 import { SyncDescriptor, getGlobalCollection } from '../common/IOC/serviceCollection';
 import { InstantiationService } from '../common/IOC/InstantiationService';
+import { dynamicImportStyle } from './css/dynamicImportStyle'
 
 
 export const enum Parts {
@@ -78,11 +79,14 @@ export class Workbench {
 
 // 创建运行workbench
 function main() {
+
     const services = getGlobalCollection()
     const WorkbenchDesc = new SyncDescriptor(Workbench)
 
     const instantiationService = new InstantiationService(services)
     const workbench = instantiationService.createInstance(WorkbenchDesc)
+   
+    dynamicImportStyle() // 加载CSS
 
     workbench.open()
 }

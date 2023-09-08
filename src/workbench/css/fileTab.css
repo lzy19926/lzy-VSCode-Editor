@@ -1,0 +1,62 @@
+/* ! --------- 打开的文件tab栏样式  */
+
+.filetab_part {
+    height: 25px;
+    width: 85%;
+    position: fixed;
+    top: 35px;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.850);
+    border-top: solid 3px #ccc;
+    border-bottom: .1px solid #747474;
+}
+
+.filetab_ul {
+    display: flex;
+    font-size: 12px;
+    color: azure;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    background-color: black;
+}
+
+
+.filetab_ul div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filetab_ul .filetab_item {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 0px 10px;
+    border-right: .1px solid #747474;
+    cursor: pointer;
+}
+
+
+.filetab_item:hover {
+    background-color: #1e1e1e;
+}
+
+.filetab_ul .focus {
+    border-top: 4px solid rgb(30, 128, 255);
+    background-color: #1e1e1e;
+}
+
+.file_name {
+    min-width: 30px;
+}
+
+.close_button {
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+}
+
+.close_button:hover {
+    background-color: #3d3d3d;
+    border-radius: 2px;
+}
