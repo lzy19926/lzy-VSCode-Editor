@@ -8,7 +8,7 @@
 
 import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { createDecorator } from '../../common/IOC/decorator'
-import { ITextFileService } from '../services/TextFileService'
+import { IEditorModelService } from '../services/EditorModelService'
 import { ICommandService } from '../command/CommandService'
 import { IEditorPart } from './Editor'
 import { TabView } from '../dom/tabView'
@@ -25,7 +25,7 @@ export class FileTabPart implements IFileTabPart, Part {
     constructor(
         @IEditorPart private readonly editorPart: IEditorPart,
         @ICommandService private readonly commandService: ICommandService,
-        @ITextFileService private readonly textFileService: ITextFileService,
+        @IEditorModelService private readonly editorModelService: IEditorModelService,
     ) { }
 
     // 创建
@@ -63,7 +63,7 @@ export class FileTabPart implements IFileTabPart, Part {
         this.fileSet.delete(path)
         this._tab.removeItem(path)
     }
-
+ 
     // 渲染文件tabs
     renderFileTabs() {
         const tab = new TabView()
@@ -84,7 +84,7 @@ export class FileTabPart implements IFileTabPart, Part {
     }
 
     _removeFile(path: string) {
-        this.textFileService.removeFileModel(path)
+        this.editorModelService.removeFileModel(path)
         this.removeTabItem(path)
 
         this.fileList = this.fileList.filter(item => item !== path)

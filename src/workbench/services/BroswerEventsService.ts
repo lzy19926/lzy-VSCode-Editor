@@ -8,12 +8,12 @@
  */
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import { ITextFileService } from './TextFileService'
+import { IEditorModelService } from './EditorModelService'
 
 export class BroswerEventsService {
 
     constructor(
-        @ITextFileService private readonly textFileService: ITextFileService,
+        @IEditorModelService private readonly editorModelService: IEditorModelService,
     ) {
         this.onSaveFile()
     }
@@ -29,7 +29,7 @@ export class BroswerEventsService {
                 event.preventDefault();
                 console.log('Ctrl+S was pressed');
 
-                that.textFileService.diffCurrentFileModel()
+                that.editorModelService.diffCurrentFileModel()
             }
         });
     }

@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:54:44
+ * @LastEditTime: 2023-09-08 15:21:33
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
@@ -11,16 +11,23 @@ import { registerSingleton } from '../../common/IOC/serviceCollection'
 import { ICacheFileService } from './CacheFileService'
 import { IEditorPart } from '../parts/Editor'
 import { IIPCRendererService } from './IPCRendererService'
-import type { TreeNode } from '../dom/treeView'
+import type { editor as monaco } from 'monaco-editor'
+
+export type MonacoEditor = monaco.ICodeEditor
+export type EditorModel = monaco.ITextModel
+
+
 // 单个文本文件模型
 export type TextFileModel = {
     id: string
     text: string
     buffer: Uint8Array | undefined
+    editorModel: EditorModel
 }
 
 
-export class TextFileService {
+export class EditorModelService {
+    readonly _editor!: MonacoEditor
     readonly _currentModel?: TextFileModel //当前编辑器中的文件模型
 
     constructor(
@@ -28,7 +35,7 @@ export class TextFileService {
         @IEditorPart private readonly editorPart: IEditorPart,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
-
+        this._editor = editorPart.editor
     }
     // 比较编辑器文本和原文件内容
     // todo 需要优化为使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
@@ -92,16 +99,21 @@ export class TextFileService {
         console.log(`Update File:[[${path}]] in Disk Succeed`);
     }
 
+    // 创建monaco用的模型
+    public createEditorModel() {
+
+    }
+
 }
 
-export interface ITextFileService {
+export interface IEditorModelService {
     diffCurrentFileModel(): void
     getFileModel(path: string): Promise<TextFileModel>
     removeFileModel(path: string): boolean
 }
 
-export const ITextFileService = createDecorator<ITextFileService>("ITextFileService")
-registerSingleton(ITextFileService, TextFileService)
+export const IEditorModelService = createDecorator<IEditorModelService>("IEditorModelService")
+registerSingleton(IEditorModelService, EditorModelService)
 
 
 

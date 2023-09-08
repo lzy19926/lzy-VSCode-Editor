@@ -10,14 +10,14 @@
 import { IEditorPart } from "../parts/Editor";
 import { IFileTabPart } from "../parts/FileTab";
 import { ISideBarPart } from "../parts/SideBar";
-import { ITextFileService } from "../services/TextFileService"
+import { IEditorModelService } from "../services/EditorModelService"
 import { IIPCRendererService } from "../services/IPCRendererService";
 import { CommandsRegistry } from "./CommandsRegistry";
 import { accessor } from '../api/BroswerServiceAccessor'
 
 // Services
 const editorService = accessor.get(IEditorPart)
-const textFileService = accessor.get(ITextFileService)
+const editorModelService = accessor.get(IEditorModelService)
 const fileTabPart = accessor.get(IFileTabPart)
 const sideBarPart = accessor.get(ISideBarPart)
 const ipcRendererService = accessor.get(IIPCRendererService)
@@ -28,7 +28,7 @@ async function loadFileContent(path: string) {
     const isCurrentModel = editorService.getCurrentModel()?.id == path
     if (isCurrentModel) return
 
-    const model = await textFileService.getFileModel(path)
+    const model = await editorModelService.getFileModel(path)
     editorService.loadFileModel(model)
     fileTabPart.addOrFocuseTabItem(model.id)
 }

@@ -8,7 +8,7 @@
 
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import type { TextFileModel } from './TextFileService'
+import type { TextFileModel } from './EditorModelService'
 
 export class CacheFileService {
 

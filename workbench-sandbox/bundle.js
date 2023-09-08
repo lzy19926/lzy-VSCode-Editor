@@ -182,10 +182,33 @@ class EditorPart {
             var options = {
                 value: '// 在此处输入您的代码',
                 language: 'typescript',
-                theme: "vs-dark"
+                theme: "vs-dark",
+                suggest: {
+                    showImports: true,
+                },
+                typeHints: {
+                    showAllSymbols: true,
+                },
             };
             /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上 
             this._editor = window.monaco.editor.create(this._container, options);
+            // 文件模型注入测试
+            setTimeout(() => {
+                /*@ts-ignore**/
+                const createUri = (uri) => window.monaco.Uri.parse(uri);
+                /*@ts-ignore**/
+                const createModel = (content, uri) => window.monaco.editor.createModel(content, "typescript", uri);
+                /*@ts-ignore**/
+                const setModel = (m) => this._editor.setModel(m);
+                const bUri = createUri('b.js');
+                const bContent = 'export default "Hello world!"';
+                const bModel = createModel(bContent, bUri);
+                setModel(bModel);
+                const aUri = createUri('a.js');
+                const aContent = 'import b from "./b";';
+                const aModel = createModel(aContent, aUri);
+                setModel(aModel);
+            }, 1000);
         });
     }
     // 加载monaco-editor样式文件

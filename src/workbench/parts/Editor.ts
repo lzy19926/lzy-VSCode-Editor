@@ -3,19 +3,20 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:21:21
+ * @LastEditTime: 2023-09-08 15:04:49
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { Part } from './Part'
 import { createDecorator } from '../../common/IOC/decorator'
 import { registerSingleton } from '../../common/IOC/serviceCollection'
-import type { TextFileModel } from '../services/TextFileService'
+import type { TextFileModel } from '../services/EditorModelService'
 import type { editor as monaco } from 'monaco-editor'
 
-type MonacoEditor = monaco.ICodeEditor
+export type MonacoEditor = monaco.ICodeEditor
+export type EditorModel = monaco.ITextModel
 
 export class EditorPart implements IEditorPart, Part {
-    private _editor!: MonacoEditor
+    public editor!: MonacoEditor
     private _container!: HTMLElement
     private _currentModel?: TextFileModel
 
@@ -45,12 +46,46 @@ export class EditorPart implements IEditorPart, Part {
             var options = {
                 value: '// 在此处输入您的代码',
                 language: 'typescript',
-                theme: "vs-dark"
+                theme: "vs-dark",
+
+                suggest: { // 开启导入提示功能
+                    showImports: true,
+                },
+                typeHints: {// 显示全部类型定义（包括通过 import 引用到其他文件中）
+                    showAllSymbols: true,
+                },
             };
 
             /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上 
-            this._editor = window.monaco.editor.create(this._container, options);
+            this.editor = window.monaco.editor.create(this._container, options);
+
+
+
+            // 文件模型注入测试
+            setTimeout(() => {
+                /*@ts-ignore**/
+                const createUri = (uri: string) => window.monaco.Uri.parse(uri);
+                /*@ts-ignore**/
+                const createModel = (content: string, uri: any) => window.monaco.editor.createModel(content, "typescript", uri);
+                /*@ts-ignore**/
+                const setModel = (m: any) => this.editor.setModel(m);
+
+                const bUri = createUri('b.js');
+                const bContent = 'export default "Hello world!"'
+                const bModel = createModel(bContent, bUri)
+                setModel(bModel);
+
+                const aUri = createUri('a.js');
+                const aContent = 'import b from "./b";';
+                const aModel = createModel(aContent, aUri);
+                setModel(aModel);
+            }, 1000)
+
         })
+
+
+
+
     }
 
     // 加载monaco-editor样式文件
@@ -69,8 +104,8 @@ export class EditorPart implements IEditorPart, Part {
 
             this._container.style.height = `${height}px`;
 
-            if (this._editor) {
-                this._editor.layout();
+            if (this.editor) {
+                this.editor.layout();
             }
         });
 
@@ -78,7 +113,7 @@ export class EditorPart implements IEditorPart, Part {
 
     // 编辑器加载文件
     public loadFileModel(model: TextFileModel) {
-        this._editor.getModel()!.setValue(model.text)
+        this.editor.getModel()!.setValue(model.text)
         this._currentModel = model
         console.log("loadFile model", this._currentModel);
     }
@@ -90,16 +125,17 @@ export class EditorPart implements IEditorPart, Part {
 
     // 获取当前文本
     public getCurrentText(): string {
-        return this._editor.getModel()!.getValue()
+        return this.editor.getModel()!.getValue()
     }
 
     // 清空内容
     public clearContent() {
-        this._editor.getModel()!.setValue("//请打开文件")
+        this.editor.getModel()!.setValue("//请打开文件")
     }
 }
 
 export interface IEditorPart {
+    editor: MonacoEditor
     create(container: HTMLElement): void
     loadFileModel(model: TextFileModel): void
     clearContent(): void

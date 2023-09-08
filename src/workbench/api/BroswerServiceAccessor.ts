@@ -11,7 +11,7 @@
 import { IEditorPart } from "../parts/Editor";
 import { IFileTabPart } from "../parts/FileTab";
 import { ISideBarPart } from "../parts/SideBar";
-import { ITextFileService } from "../services/TextFileService"
+import { IEditorModelService } from "../services/EditorModelService"
 import { ServiceIdentifier } from "../../common/IOC/decorator"
 import { IIPCRendererService } from "../services/IPCRendererService";
 import { InstantiationService } from "../../common/IOC/InstantiationService";
@@ -28,12 +28,12 @@ class BroswerServiceAccessor {
         @ISideBarPart private readonly sideBarPart: ISideBarPart,
         @IFileTabPart private readonly fileTabPart: IFileTabPart,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
-        @ITextFileService private readonly textFileService: ITextFileService,
+        @IEditorModelService private readonly editorModelService: IEditorModelService,
     ) {
         this._services.set(IEditorPart, editorPart)
         this._services.set(ISideBarPart, sideBarPart)
         this._services.set(IFileTabPart, fileTabPart)
-        this._services.set(ITextFileService, textFileService)
+        this._services.set(IEditorModelService, editorModelService)
         this._services.set(IIPCRendererService, ipcRendererService)
     }
 
