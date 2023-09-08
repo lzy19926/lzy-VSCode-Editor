@@ -2,13 +2,13 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 16:17:00
+ * @LastEditTime: 2023-09-08 11:05:26
  * @Description: 用于读取和解析文件的服务
  */
 
-import { createDecorator } from './IOC/decorator'
-import { registerSingleton } from './IOC/serviceCollection'
-import { getFileName } from './utils';
+import { createDecorator } from '../common/IOC/decorator'
+import { registerSingleton } from '../common/IOC/serviceCollection'
+import { getFileName } from '../common/utils';
 import { dialog } from "electron"
 import * as fs from 'fs';
 import * as path from 'path';

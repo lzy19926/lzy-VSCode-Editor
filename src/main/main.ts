@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-21 17:55:21
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-30 10:57:44
+ * @LastEditTime: 2023-09-08 11:05:04
  * @Description: 应用主进程的入口
  */
 
@@ -11,13 +11,13 @@ import { app } from 'electron';
 import { getGlobalCollection, SyncDescriptor } from '../common/IOC/serviceCollection'
 import { InstantiationService, IInstantiationService } from '../common/IOC/InstantiationService'
 import { WindowApplicationService, IWindowApplicationService } from './WindowApplication';
-import { INlsService } from '../common/NlsService';
-import { IFileService } from '../common/FileService';
-import { IPerformanceService } from '../common/PerformanceService';
-import { IWindowService } from '../common/WindowService';
-import { IProtocolService } from '../common/ProtocolService'
-import { IIPCMainService } from '../common/IPCMainService';
-import { ITerminalService } from '../common/TerminalService';
+import { INlsService } from '../services/NlsService';
+import { IFileService } from '../services/FileService';
+import { IPerformanceService } from '../services/PerformanceService';
+import { IWindowService } from '../services/WindowService';
+import { IProtocolService } from '../services/ProtocolService'
+import { IIPCMainService } from '../services/IPCMainService';
+import { ITerminalService } from '../services/TerminalService';
 import type { ServiceCollection } from '../common/IOC/serviceCollection'
 class CodeMain {
 

@@ -8,9 +8,9 @@
 import * as os from 'os'
 import * as pty from 'node-pty'
 import WebSocket from 'ws';
-import { createDecorator } from './IOC/decorator'
-import { registerSingleton } from './IOC/serviceCollection'
-import { checkPort } from './utils'
+import { createDecorator } from '../common/IOC/decorator'
+import { registerSingleton } from '../common/IOC/serviceCollection'
+import { checkPort } from '../common/utils'
 
 export class TerminalService {
     private term?: pty.IPty

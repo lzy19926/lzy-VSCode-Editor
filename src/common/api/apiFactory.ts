@@ -2,15 +2,15 @@
  * @Author: Luzy
  * @Date: 2023-08-26 00:48:48
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 12:29:22
+ * @LastEditTime: 2023-09-08 11:04:10
  * @Description: 定义所有暴露出去的主服务API
  */
 //! 使用contextBridge模块即可将node进程代码暴露给浏览器沙箱环境
 
 import { accessor } from './ServiceAccessor'
-import { IFileService } from "../../common/FileService"
-import { ITerminalService } from '../../common/TerminalService'
-import type { FileTreeNode } from "../../common/FileService"
+import { IFileService } from "../../services/FileService"
+import { ITerminalService } from '../../services/TerminalService'
+import type { FileTreeNode } from "../../services/FileService"
 
 
 export interface LZY_API {

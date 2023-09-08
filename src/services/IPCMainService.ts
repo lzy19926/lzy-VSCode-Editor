@@ -2,14 +2,14 @@
  * @Author: Luzy
  * @Date: 2023-08-22 11:36:46
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-28 15:35:15
+ * @LastEditTime: 2023-09-08 11:06:25
  * @Description: 运行在主进程中的IPC通信模块  用于接收子进程的服务请求  或者转发子进程消息给其他子进程
  * 通过IPC模块进行通信 以替代网络通信
  */
 import { ipcMain } from "electron"
-import { createDecorator } from './IOC/decorator'
-import { registerSingleton } from './IOC/serviceCollection'
-import { apiFactory, LZY_API } from "./api/apiFactory"
+import { createDecorator } from '../common/IOC/decorator'
+import { registerSingleton } from '../common/IOC/serviceCollection'
+import { apiFactory, LZY_API } from "../common/api/apiFactory"
 
 export class IPCMainService {
 

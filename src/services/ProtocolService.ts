@@ -6,9 +6,9 @@
  * @Description: 提供内置网络协议管理的服务  浏览器-Node进程通信部分使用该协议(大文件传输)
  */
 import { protocol, app } from 'electron';
-import { createDecorator } from './IOC/decorator'
-import { registerSingleton } from './IOC/serviceCollection'
-import { useMVC } from './api/springMVC';
+import { createDecorator } from '../common/IOC/decorator'
+import { registerSingleton } from '../common/IOC/serviceCollection'
+import { useMVC } from '../common/api/springMVC';
 export class ProtocolService {
 
     schemes: Set<string> = new Set()
@@ -43,7 +43,7 @@ export class ProtocolService {
     // https://www.electronjs.org/zh/docs/latest/breaking-changes#protocolinterceptbufferprotocol
     private registAndStartScheme(scheme: string = "lzy") {
 
-        protocol.registerStringProtocol(scheme, () => {/**do Nothing*/})
+        protocol.registerStringProtocol(scheme, () => {/**do Nothing*/ })
         protocol.interceptStringProtocol(scheme, useMVC)
 
         if (this.checkProtocolRegistered(scheme)) {

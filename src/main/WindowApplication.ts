@@ -2,12 +2,12 @@
  * @Author: Luzy
  * @Date: 2023-08-21 19:06:07
  * @LastEditors: Luzy
- * @LastEditTime: 2023-08-26 16:37:46
+ * @LastEditTime: 2023-09-08 11:05:11
  * @Description: 主窗口模块 对应每个打开的窗口App
  */
 import { app, BrowserWindow } from 'electron';
 import { IInstantiationService } from '../common/IOC/InstantiationService'
-import { IFileService } from '../common/FileService'
+import { IFileService } from '../services/FileService'
 export class WindowApplicationService implements IWindowApplicationService {
 
     private _win?: BrowserWindow

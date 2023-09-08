@@ -20,7 +20,7 @@ exports.Workbench = exports.Parts = void 0;
  * @Author: Luzy
  * @Date: 2023-08-21 18:09:25
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-08 10:58:18
+ * @LastEditTime: 2023-09-08 11:00:35
  * @Description: 运行于浏览器端的编辑器主模块
  */
 __webpack_require__(1);
@@ -32,8 +32,7 @@ const FileTab_1 = __webpack_require__(5);
 const BroswerEventsService_1 = __webpack_require__(22);
 const serviceCollection_1 = __webpack_require__(4);
 const InstantiationService_1 = __webpack_require__(16);
-const import_1 = __webpack_require__(23);
-(0, import_1.dynamicImportStyle)();
+const dynamicImportStyle_1 = __webpack_require__(23);
 var Parts;
 (function (Parts) {
     Parts["TITLEBAR_PART"] = "workbench.parts.titlebar";
@@ -89,6 +88,7 @@ function main() {
     const WorkbenchDesc = new serviceCollection_1.SyncDescriptor(Workbench);
     const instantiationService = new InstantiationService_1.InstantiationService(services);
     const workbench = instantiationService.createInstance(WorkbenchDesc);
+    (0, dynamicImportStyle_1.dynamicImportStyle)(); // 加载CSS
     workbench.open();
 }
 main();
@@ -1546,12 +1546,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.dynamicImportStyle = void 0;
-// import './global.css'
-// import './editor.css'
-// import './fileTab.css'
-// import './sideBar.css'
-// import './terminal.css'
-// import './titleBar.css'
 const dynamicImportStyle = () => {
     /**@ts-ignore*/
     Promise.resolve().then(() => __importStar(__webpack_require__(/* webpackChunkName: "app" */ 24)));

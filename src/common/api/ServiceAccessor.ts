@@ -7,8 +7,8 @@
  * 通过serviceCollection获取的可能是描述器而不是实例 
  */
 
-import { IFileService } from "../../common/FileService";
-import { ITerminalService } from '../../common/TerminalService'
+import { IFileService } from "../../services/FileService";
+import { ITerminalService } from '../../services/TerminalService'
 import { ServiceIdentifier } from "../../common/IOC/decorator"
 import { InstantiationService } from "../../common/IOC/InstantiationService";
 import { SyncDescriptor, getGlobalCollection } from "../../common/IOC/serviceCollection";
