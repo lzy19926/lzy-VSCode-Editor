@@ -111,13 +111,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const Editor_1 = __webpack_require__(2);
 const FileTab_1 = __webpack_require__(5);
 const SideBar_1 = __webpack_require__(13);
-const TextFileService_1 = __webpack_require__(6);
+const EditorModelService_1 = __webpack_require__(6);
 const IPCRendererService_1 = __webpack_require__(8);
 const CommandsRegistry_1 = __webpack_require__(10);
 const BroswerServiceAccessor_1 = __webpack_require__(15);
 // Services
 const editorService = BroswerServiceAccessor_1.accessor.get(Editor_1.IEditorPart);
-const textFileService = BroswerServiceAccessor_1.accessor.get(TextFileService_1.ITextFileService);
+const editorModelService = BroswerServiceAccessor_1.accessor.get(EditorModelService_1.IEditorModelService);
 const fileTabPart = BroswerServiceAccessor_1.accessor.get(FileTab_1.IFileTabPart);
 const sideBarPart = BroswerServiceAccessor_1.accessor.get(SideBar_1.ISideBarPart);
 const ipcRendererService = BroswerServiceAccessor_1.accessor.get(IPCRendererService_1.IIPCRendererService);
@@ -126,7 +126,7 @@ async function loadFileContent(path) {
     const isCurrentModel = editorService.getCurrentModel()?.id == path;
     if (isCurrentModel)
         return;
-    const model = await textFileService.getFileModel(path);
+    const model = await editorModelService.getFileModel(path);
     editorService.loadFileModel(model);
     fileTabPart.addOrFocuseTabItem(model.id);
 }
@@ -157,7 +157,7 @@ exports.IEditorPart = exports.EditorPart = void 0;
 const decorator_1 = __webpack_require__(3);
 const serviceCollection_1 = __webpack_require__(4);
 class EditorPart {
-    _editor;
+    editor;
     _container;
     _currentModel;
     constructor() { }
@@ -190,25 +190,8 @@ class EditorPart {
                     showAllSymbols: true,
                 },
             };
-            /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上 
-            this._editor = window.monaco.editor.create(this._container, options);
-            // 文件模型注入测试
-            setTimeout(() => {
-                /*@ts-ignore**/
-                const createUri = (uri) => window.monaco.Uri.parse(uri);
-                /*@ts-ignore**/
-                const createModel = (content, uri) => window.monaco.editor.createModel(content, "typescript", uri);
-                /*@ts-ignore**/
-                const setModel = (m) => this._editor.setModel(m);
-                const bUri = createUri('b.js');
-                const bContent = 'export default "Hello world!"';
-                const bModel = createModel(bContent, bUri);
-                setModel(bModel);
-                const aUri = createUri('a.js');
-                const aContent = 'import b from "./b";';
-                const aModel = createModel(aContent, aUri);
-                setModel(aModel);
-            }, 1000);
+            /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上
+            this.editor = window.monaco.editor.create(this._container, options);
         });
     }
     // 加载monaco-editor样式文件
@@ -224,14 +207,15 @@ class EditorPart {
         window.addEventListener('resize', () => {
             const height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) - this._container.offsetTop;
             this._container.style.height = `${height}px`;
-            if (this._editor) {
-                this._editor.layout();
+            if (this.editor) {
+                this.editor.layout();
             }
         });
     }
     // 编辑器加载文件
     loadFileModel(model) {
-        this._editor.getModel().setValue(model.text);
+        this.editor.setModel(model.editorModel);
+        // this.editor.getModel()!.setValue(model.text)
         this._currentModel = model;
         console.log("loadFile model", this._currentModel);
     }
@@ -241,11 +225,11 @@ class EditorPart {
     }
     // 获取当前文本
     getCurrentText() {
-        return this._editor.getModel().getValue();
+        return this.editor.getModel().getValue();
     }
     // 清空内容
     clearContent() {
-        this._editor.getModel().setValue("//请打开文件");
+        this.editor.getModel().setValue("//请打开文件");
     }
 }
 exports.EditorPart = EditorPart;
@@ -383,22 +367,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IFileTabPart = exports.FileTabPart = void 0;
 const serviceCollection_1 = __webpack_require__(4);
 const decorator_1 = __webpack_require__(3);
-const TextFileService_1 = __webpack_require__(6);
+const EditorModelService_1 = __webpack_require__(6);
 const CommandService_1 = __webpack_require__(9);
 const Editor_1 = __webpack_require__(2);
 const tabView_1 = __webpack_require__(11);
 let FileTabPart = exports.FileTabPart = class FileTabPart {
     editorPart;
     commandService;
-    textFileService;
+    editorModelService;
     _tab;
     fileList = [];
     fileSet = new Set();
     _container;
-    constructor(editorPart, commandService, textFileService) {
+    constructor(editorPart, commandService, editorModelService) {
         this.editorPart = editorPart;
         this.commandService = commandService;
-        this.textFileService = textFileService;
+        this.editorModelService = editorModelService;
     }
     // 创建
     create(container) {
@@ -444,7 +428,7 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
         this._removeFile(path);
     }
     _removeFile(path) {
-        this.textFileService.removeFileModel(path);
+        this.editorModelService.removeFileModel(path);
         this.removeTabItem(path);
         this.fileList = this.fileList.filter(item => item !== path);
     }
@@ -473,7 +457,7 @@ let FileTabPart = exports.FileTabPart = class FileTabPart {
 exports.FileTabPart = FileTabPart = __decorate([
     __param(0, Editor_1.IEditorPart),
     __param(1, CommandService_1.ICommandService),
-    __param(2, TextFileService_1.ITextFileService)
+    __param(2, EditorModelService_1.IEditorModelService)
 ], FileTabPart);
 exports.IFileTabPart = (0, decorator_1.createDecorator)("IFileTabPart");
 (0, serviceCollection_1.registerSingleton)(exports.IFileTabPart, FileTabPart);
@@ -489,7 +473,7 @@ exports.IFileTabPart = (0, decorator_1.createDecorator)("IFileTabPart");
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-07 19:54:44
+ * @LastEditTime: 2023-10-26 01:07:36
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -502,21 +486,23 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ITextFileService = exports.TextFileService = void 0;
+exports.IEditorModelService = exports.EditorModelService = void 0;
 const decorator_1 = __webpack_require__(3);
 const serviceCollection_1 = __webpack_require__(4);
 const CacheFileService_1 = __webpack_require__(7);
 const Editor_1 = __webpack_require__(2);
 const IPCRendererService_1 = __webpack_require__(8);
-let TextFileService = exports.TextFileService = class TextFileService {
+let EditorModelService = exports.EditorModelService = class EditorModelService {
     cacheFileService;
     editorPart;
     ipcRendererService;
+    _editor;
     _currentModel; //当前编辑器中的文件模型
     constructor(cacheFileService, editorPart, ipcRendererService) {
         this.cacheFileService = cacheFileService;
         this.editorPart = editorPart;
         this.ipcRendererService = ipcRendererService;
+        this.getEditorInstance();
     }
     // 比较编辑器文本和原文件内容
     // todo 需要优化为使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
@@ -553,6 +539,15 @@ let TextFileService = exports.TextFileService = class TextFileService {
         }
         return model;
     }
+    // 轮询检查挂载monacoEditor实例
+    getEditorInstance() {
+        const interval = setInterval(() => {
+            if (this.editorPart.editor) {
+                this._editor = this.editorPart.editor;
+                clearInterval(interval);
+            }
+        }, 200);
+    }
     // 创建文件模型(创建文件的Uint8Array和text)
     _createFileModel(path, bufferOrText) {
         let text, buffer;
@@ -563,21 +558,32 @@ let TextFileService = exports.TextFileService = class TextFileService {
             buffer = new Uint8Array(bufferOrText);
             text = new TextDecoder().decode(buffer);
         }
-        return { id: path, text, buffer };
+        let editorModel = this._createEditorModel(path, text);
+        return { id: path, text, buffer, editorModel };
     }
     // 通知文件进程写回文件内容到硬盘
     updateDiskFile(path, content) {
         this.ipcRendererService.invokeAPI("writeFileTextSync", { path, text: content });
         console.log(`Update File:[[${path}]] in Disk Succeed`);
     }
+    // 创建monaco用的模型
+    _createEditorModel(path, content) {
+        const fileName = path.split("\\").pop();
+        /*@ts-ignore**/
+        const uri = window.monaco.Uri.parse(path);
+        /*@ts-ignore**/
+        const monacoModel = window.monaco.editor.createModel(content, "typescript", uri);
+        console.log('createEditorModel:', path);
+        return monacoModel;
+    }
 };
-exports.TextFileService = TextFileService = __decorate([
+exports.EditorModelService = EditorModelService = __decorate([
     __param(0, CacheFileService_1.ICacheFileService),
     __param(1, Editor_1.IEditorPart),
     __param(2, IPCRendererService_1.IIPCRendererService)
-], TextFileService);
-exports.ITextFileService = (0, decorator_1.createDecorator)("ITextFileService");
-(0, serviceCollection_1.registerSingleton)(exports.ITextFileService, TextFileService);
+], EditorModelService);
+exports.IEditorModelService = (0, decorator_1.createDecorator)("IEditorModelService");
+(0, serviceCollection_1.registerSingleton)(exports.IEditorModelService, EditorModelService);
 
 
 /***/ }),
@@ -1109,7 +1115,7 @@ exports.accessor = void 0;
 const Editor_1 = __webpack_require__(2);
 const FileTab_1 = __webpack_require__(5);
 const SideBar_1 = __webpack_require__(13);
-const TextFileService_1 = __webpack_require__(6);
+const EditorModelService_1 = __webpack_require__(6);
 const IPCRendererService_1 = __webpack_require__(8);
 const InstantiationService_1 = __webpack_require__(16);
 const serviceCollection_1 = __webpack_require__(4);
@@ -1118,19 +1124,19 @@ let BroswerServiceAccessor = class BroswerServiceAccessor {
     sideBarPart;
     fileTabPart;
     ipcRendererService;
-    textFileService;
+    editorModelService;
     _services = new Map();
     // 注入API所需的服务实例储存起来
-    constructor(editorPart, sideBarPart, fileTabPart, ipcRendererService, textFileService) {
+    constructor(editorPart, sideBarPart, fileTabPart, ipcRendererService, editorModelService) {
         this.editorPart = editorPart;
         this.sideBarPart = sideBarPart;
         this.fileTabPart = fileTabPart;
         this.ipcRendererService = ipcRendererService;
-        this.textFileService = textFileService;
+        this.editorModelService = editorModelService;
         this._services.set(Editor_1.IEditorPart, editorPart);
         this._services.set(SideBar_1.ISideBarPart, sideBarPart);
         this._services.set(FileTab_1.IFileTabPart, fileTabPart);
-        this._services.set(TextFileService_1.ITextFileService, textFileService);
+        this._services.set(EditorModelService_1.IEditorModelService, editorModelService);
         this._services.set(IPCRendererService_1.IIPCRendererService, ipcRendererService);
     }
     get(id) {
@@ -1146,7 +1152,7 @@ BroswerServiceAccessor = __decorate([
     __param(1, SideBar_1.ISideBarPart),
     __param(2, FileTab_1.IFileTabPart),
     __param(3, IPCRendererService_1.IIPCRendererService),
-    __param(4, TextFileService_1.ITextFileService)
+    __param(4, EditorModelService_1.IEditorModelService)
 ], BroswerServiceAccessor);
 const instanService = new InstantiationService_1.InstantiationService((0, serviceCollection_1.getGlobalCollection)());
 exports.accessor = instanService.createInstance(new serviceCollection_1.SyncDescriptor(BroswerServiceAccessor));
@@ -1502,11 +1508,11 @@ exports.IBroswerEventsService = exports.BroswerEventsService = void 0;
  */
 const decorator_1 = __webpack_require__(3);
 const serviceCollection_1 = __webpack_require__(4);
-const TextFileService_1 = __webpack_require__(6);
+const EditorModelService_1 = __webpack_require__(6);
 let BroswerEventsService = exports.BroswerEventsService = class BroswerEventsService {
-    textFileService;
-    constructor(textFileService) {
-        this.textFileService = textFileService;
+    editorModelService;
+    constructor(editorModelService) {
+        this.editorModelService = editorModelService;
         this.onSaveFile();
     }
     //todo 使用mousetrap库进行改写
@@ -1519,13 +1525,13 @@ let BroswerEventsService = exports.BroswerEventsService = class BroswerEventsSer
                 // 防止浏览器默认行为 
                 event.preventDefault();
                 console.log('Ctrl+S was pressed');
-                that.textFileService.diffCurrentFileModel();
+                that.editorModelService.diffCurrentFileModel();
             }
         });
     }
 };
 exports.BroswerEventsService = BroswerEventsService = __decorate([
-    __param(0, TextFileService_1.ITextFileService)
+    __param(0, EditorModelService_1.IEditorModelService)
 ], BroswerEventsService);
 exports.IBroswerEventsService = (0, decorator_1.createDecorator)("IBroswerEventsService");
 (0, serviceCollection_1.registerSingleton)(exports.IBroswerEventsService, BroswerEventsService);

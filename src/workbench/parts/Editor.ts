@@ -3,7 +3,7 @@
  * @Author: Luzy
  * @Date: 2023-08-22 10:31:12
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-08 15:04:49
+ * @LastEditTime: 2023-10-26 01:09:47
  * @Description: workbench的编辑器部分  使用monaco-editor
  */
 import { Part } from './Part'
@@ -56,36 +56,9 @@ export class EditorPart implements IEditorPart, Part {
                 },
             };
 
-            /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上 
+            /*@ts-ignore**/ // 创建编辑器实例，并将其挂载到指定 dom 元素上
             this.editor = window.monaco.editor.create(this._container, options);
-
-
-
-            // 文件模型注入测试
-            setTimeout(() => {
-                /*@ts-ignore**/
-                const createUri = (uri: string) => window.monaco.Uri.parse(uri);
-                /*@ts-ignore**/
-                const createModel = (content: string, uri: any) => window.monaco.editor.createModel(content, "typescript", uri);
-                /*@ts-ignore**/
-                const setModel = (m: any) => this.editor.setModel(m);
-
-                const bUri = createUri('b.js');
-                const bContent = 'export default "Hello world!"'
-                const bModel = createModel(bContent, bUri)
-                setModel(bModel);
-
-                const aUri = createUri('a.js');
-                const aContent = 'import b from "./b";';
-                const aModel = createModel(aContent, aUri);
-                setModel(aModel);
-            }, 1000)
-
         })
-
-
-
-
     }
 
     // 加载monaco-editor样式文件

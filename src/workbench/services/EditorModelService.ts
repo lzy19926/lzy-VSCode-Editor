@@ -2,7 +2,7 @@
  * @Author: Luzy
  * @Date: 2023-08-25 16:42:55
  * @LastEditors: Luzy
- * @LastEditTime: 2023-09-08 15:21:33
+ * @LastEditTime: 2023-10-26 01:07:36
  * @Description: 提供前端文本模型相关功能, 前端文本先修改后再修改后端文本
  */
 
@@ -27,7 +27,7 @@ export type TextFileModel = {
 
 
 export class EditorModelService {
-    readonly _editor!: MonacoEditor
+    private _editor!: MonacoEditor
     readonly _currentModel?: TextFileModel //当前编辑器中的文件模型
 
     constructor(
@@ -35,7 +35,7 @@ export class EditorModelService {
         @IEditorPart private readonly editorPart: IEditorPart,
         @IIPCRendererService private readonly ipcRendererService: IIPCRendererService,
     ) {
-        this._editor = editorPart.editor
+        this.getEditorInstance()
     }
     // 比较编辑器文本和原文件内容
     // todo 需要优化为使用ArrayBuffer进行逐行比较  否则字符串过大会崩溃
@@ -79,6 +79,16 @@ export class EditorModelService {
         return model
     }
 
+    // 轮询检查挂载monacoEditor实例
+    private getEditorInstance() {
+        const interval = setInterval(() => {
+            if (this.editorPart.editor) {
+                this._editor = this.editorPart.editor
+                clearInterval(interval)
+            }
+        }, 200)
+    }
+
     // 创建文件模型(创建文件的Uint8Array和text)
     private _createFileModel(path: string, bufferOrText: Buffer | string): TextFileModel {
         let text, buffer
@@ -90,7 +100,9 @@ export class EditorModelService {
             text = new TextDecoder().decode(buffer);
         }
 
-        return { id: path, text, buffer }
+        let editorModel = this._createEditorModel(path, text)
+
+        return { id: path, text, buffer, editorModel }
     }
 
     // 通知文件进程写回文件内容到硬盘
@@ -100,8 +112,15 @@ export class EditorModelService {
     }
 
     // 创建monaco用的模型
-    public createEditorModel() {
+    private _createEditorModel(path: string, content: string): EditorModel {
+        const fileName = path.split("\\").pop()
+        /*@ts-ignore**/
+        const uri = window.monaco.Uri.parse(path);
+        /*@ts-ignore**/
+        const monacoModel = window.monaco.editor.createModel(content, "typescript", uri);
+        console.log('createEditorModel:', path);
 
+        return monacoModel
     }
 
 }
@@ -114,9 +133,3 @@ export interface IEditorModelService {
 
 export const IEditorModelService = createDecorator<IEditorModelService>("IEditorModelService")
 registerSingleton(IEditorModelService, EditorModelService)
-
-
-
-
-
-
